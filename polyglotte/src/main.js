@@ -17,6 +17,7 @@ import { renderWelcome } from './onboarding.js';
 import { playSplash } from './splash.js';
 import { load3D } from './visual.js';
 import { startSky, renderSky } from './sky.js';
+import { STATIC } from './env.js';
 import { SECTORS, GOALS, TRACKS, trackOf, levelThreshold, findSector } from './curriculum.js';
 
 // ---------- Routeur ----------
@@ -197,7 +198,7 @@ function languageCard(l) {
   return `<button class="lang-card ${active ? 'active' : ''}" data-lang="${esc(l.id)}" data-search="${esc(`${name} ${l.name} ${l.native}`.toLowerCase())}">
     <span class="lang-native" dir="auto">${esc(l.native)}</span>
     <span class="lang-name">${esc(name)}</span>
-    <span class="lang-meta">${offline ? `<span class="badge ok">${t('A1 hors ligne')}</span>` : `<span class="badge">${t('Leçons par IA')}</span>`}${started ? `<span class="badge">${t('{n} vus', { n: started })}</span>` : ''}</span>
+    <span class="lang-meta">${offline ? `<span class="badge ok">${t('A1 hors ligne')}</span>` : `<span class="badge">${t(STATIC ? 'Bientôt' : 'Leçons par IA')}</span>`}${started ? `<span class="badge">${t('{n} vus', { n: started })}</span>` : ''}</span>
   </button>`;
 }
 
@@ -252,7 +253,7 @@ function pathNode(u, ui, nextId) {
   const track = trackOf(u);
   const isNext = u.id === nextId;
   const state = p.canDo ? 'done' : isNext ? 'next' : u.ready && p.known > 0 ? 'started' : 'todo';
-  const status = !u.ready ? t('À préparer') : p.canDo ? t('Validée') : `${p.known} / ${p.total}`;
+  const status = !u.ready ? t(STATIC ? 'Bientôt' : 'À préparer') : p.canDo ? t('Validée') : `${p.known} / ${p.total}`;
   const face = state === 'done' ? icon('check', 30) : !u.ready ? icon('sparkle', 28) : icon(TRACK_ICON[track], 28);
   return `<li class="path-step" style="--x:${NODE_OFFSETS[ui % NODE_OFFSETS.length]}px">
     <a class="node node-${state} track-${track}" href="#/unite/${u.id}" style="--p:${Math.round(p.ratio * 100)}" aria-label="${esc(`${t('Unité {n}', { n: u.number })} : ${t(u.title)} — ${status}`)}">
@@ -374,6 +375,20 @@ function renderUnit(unitId) {
 
 function renderUnitGeneration(u) {
   const lvl = course().levels[u.levelIndex];
+  // Version gratuite : seules les leçons écrites à l'avance existent.
+  if (STATIC) {
+    app.innerHTML = `
+      <p><a class="back" href="#/parcours">${icon('left', 14)} ${t('Parcours')}</a></p>
+      <p class="eyebrow">${esc(lvl.cefr)} · ${t('Unité {n}', { n: u.number })}</p>
+      <h1>${esc(t(u.title))}</h1>
+      <section class="card center generate">
+        ${bao('comfort', 140)}
+        <h2>${t('Leçon bientôt disponible')}</h2>
+        <p class="muted">${esc(t(u.canDo))}<br>${t('Cette leçon n’est pas encore disponible hors ligne : elle arrivera dans une prochaine mise à jour.')}</p>
+        <a class="btn primary" href="#/parcours">${t('Voir le parcours')}</a>
+      </section>`;
+    return;
+  }
   app.innerHTML = `
     <p><a class="back" href="#/parcours">${icon('left', 14)} ${t('Parcours')}</a></p>
     <p class="eyebrow">${esc(lvl.cefr)} · ${t('Unité {n}', { n: u.number })}</p>
@@ -504,9 +519,11 @@ function renderSettings() {
   $('#settings').addEventListener('change', (e) => {
     const el = e.target;
     if (el.name === 'baseLang') {
-      setBase(el.value);
-      toast(t('Réglage enregistré.'));
-      return renderSettings();
+      setBase(el.value).then(() => {
+        toast(t('Réglage enregistré.'));
+        renderSettings();
+      });
+      return;
     }
     if (el.name === 'sector' || el.name === 'goal') {
       state.profile = { ...(state.profile ?? {}), [el.name]: el.value || null };
@@ -530,7 +547,7 @@ function renderSettings() {
     try {
       replaceState(store.importJSON(await file.text()));
       persist();
-      refreshUi();
+      await refreshUi();
       toast(t('Progression importée.'));
       renderSettings();
     } catch (err) {
@@ -603,7 +620,7 @@ document.addEventListener('click', (e) => {
 // Ouverture : la langue de base est choisie d'après le pays, l'application se
 // prépare derrière l'animation de Bao, puis un nouvel apprenant est accueilli
 // par le questionnaire de bienvenue.
-initLocale({ onChange: router });
+await initLocale({ onChange: router });
 startSky();
 if (!state.profile && !location.hash.startsWith('#/bienvenue')) location.replace('#/bienvenue');
 router();

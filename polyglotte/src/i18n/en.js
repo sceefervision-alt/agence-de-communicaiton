@@ -629,7 +629,8 @@ export default {
   'Soleil de midi': 'Midday sun',
   'Soleil du soir': 'Evening sun',
   'Lune et étoiles': 'Moon and stars',
-  'Cet aperçu fonctionne sans serveur : l’IA n’y est pas branchée.': 'This preview runs without a server: the AI isn’t connected here.',
+  'Cette leçon n’est pas encore disponible hors ligne : elle arrivera dans une prochaine mise à jour.': 'This lesson isn’t available offline yet: it will come in a future update.',
+  'Bientôt': 'Coming soon',
 
   // Conversation guidée (sans IA)
   'Conversation guidée': 'Guided conversation',

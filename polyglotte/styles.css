@@ -165,6 +165,13 @@ p { margin: 0 0 0.75em; }
 .orb-track { position: absolute; top: 0; bottom: 0; left: 168px; right: 104px; }
 @media (min-width: 1000px) { .orb-track { left: 240px; right: 140px; } }
 body.in-session .orb-track { left: 60px; right: 16px; }
+/* En arabe, le logo passe à droite : la course du soleil s'écarte de lui. */
+[dir='rtl'] .orb-track { left: 104px; right: 168px; }
+@media (min-width: 1000px) { [dir='rtl'] .orb-track { left: 140px; right: 240px; } }
+[dir='rtl'] body.in-session .orb-track { left: 16px; right: 60px; }
+[dir='rtl'] .cloud.c1 { left: auto; right: 8%; }
+[dir='rtl'] .cloud.c2 { left: auto; right: 48%; }
+[dir='rtl'] .cloud.c3 { left: auto; right: 80%; }
 .sky-scene .orb { position: absolute; z-index: 1; transform: translate(-50%, -50%); transition: left 2s ease, top 2s ease; }
 .sun { position: relative; display: block; width: 38px; height: 38px; }
 .sun .disc { position: absolute; inset: 7px; border-radius: 50%; background: radial-gradient(circle at 38% 35%, #fff9d6, #ffd84a 55%, #ffb81c); box-shadow: 0 0 18px 6px rgb(255 214 74 / 65%); }

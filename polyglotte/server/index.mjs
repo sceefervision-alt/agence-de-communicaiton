@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import Anthropic from '@anthropic-ai/sdk';
 import { LANGUAGES, customLanguage, findLanguage } from '../src/languages.js';
 import { isBaseLanguage } from '../src/locale.js';
-import { CATALOG, CATALOG_VERSION, cleanTable, N } from '../src/i18n.js';
+import { CATALOG, CATALOG_VERSION, cleanTable, BUILTIN, N } from '../src/i18n.js';
 import EN from '../src/i18n/en.js';
 import { findUnit, findLevel, findSector, findGoal } from '../src/curriculum.js';
 import { validateUnit } from '../src/generator.js';
@@ -200,6 +200,8 @@ async function handleUi(req, res, langId) {
   const headers = { 'cache-control': 'public, max-age=86400' };
   if (base.id === 'fr') return send(res, 200, { version: CATALOG_VERSION, strings: Object.fromEntries(CATALOG.map((s) => [s, s])) }, headers);
   if (base.id === 'en') return send(res, 200, { version: CATALOG_VERSION, strings: EN }, headers);
+  // Traductions livrées avec l'application : pas besoin d'IA.
+  if (BUILTIN.includes(base.id)) return send(res, 200, { version: CATALOG_VERSION, strings: cleanTable((await import(`../src/i18n/${base.id}.js`)).default) }, headers);
 
   const file = path.join(CACHE_DIR, 'ui', `${base.id}-${CATALOG_VERSION}.json`);
   try {

@@ -111,6 +111,19 @@ export function cleanTable(raw) {
 
 // ---------- Chargement d'une langue d'interface ----------
 
+// Langues traduites à la main et livrées avec l'application (hors ligne, sans
+// IA) ; les autres sont traduites par le serveur à la première visite.
+export const BUILTIN = ['es', 'pt', 'de', 'it', 'ar'];
+
+export async function loadBuiltin(lang) {
+  if (!BUILTIN.includes(lang)) return null;
+  try {
+    return cleanTable((await import(`./i18n/${lang}.js`)).default);
+  } catch {
+    return null;
+  }
+}
+
 const cacheKey = (lang) => `polyglotte:ui:${lang}`;
 
 export function cachedTable(lang, storage = globalThis.localStorage) {

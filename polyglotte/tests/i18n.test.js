@@ -1,6 +1,6 @@
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { t, tn, setUiLanguage, uiLanguage, isRtl, languageName, languageNameInline, validTranslation, cleanTable, CATALOG, fetchTable, cachedTable } from '../src/i18n.js';
+import { t, tn, setUiLanguage, uiLanguage, isRtl, languageName, languageNameInline, validTranslation, cleanTable, CATALOG, fetchTable, cachedTable, BUILTIN, loadBuiltin } from '../src/i18n.js';
 import { findLanguage } from '../src/languages.js';
 import EN from '../src/i18n/en.js';
 import { collectKeys } from '../scripts/i18n-keys.mjs';
@@ -76,4 +76,17 @@ test('fetchTable : vérifie, met en cache, ignore une réponse trop partielle', 
   assert.equal(partial, null);
   assert.equal(await fetchTable('pt', { storage, fetchImpl: async () => ({ ok: false }) }), null);
   assert.equal(await fetchTable('pt', { storage, fetchImpl: async () => Promise.reject(new Error('offline')) }), null);
+});
+
+test('tables intégrées (es, pt, de, it, ar) : complètes, valides, sans phrase en trop', async () => {
+  for (const lang of BUILTIN) {
+    const raw = (await import(`../src/i18n/${lang}.js`)).default;
+    assert.deepEqual(CATALOG.filter((k) => !(k in raw)), [], `${lang} : phrases manquantes`);
+    assert.deepEqual(Object.keys(raw).filter((k) => !CATALOG.includes(k)), [], `${lang} : phrases en trop`);
+    for (const k of CATALOG) assert.ok(validTranslation(k, raw[k]), `${lang} : ${k}`);
+    const table = await loadBuiltin(lang);
+    setUiLanguage(lang, table);
+    assert.notEqual(t('Continuer'), 'Continuer', lang);
+  }
+  assert.equal(await loadBuiltin('ja'), null);
 });

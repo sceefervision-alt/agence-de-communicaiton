@@ -44,7 +44,7 @@ export function validateTutorReply(raw) {
 }
 
 export async function requestTutor({ language, base = 'fr', levelId, unitId, history, profile = null, endpoint = TUTOR_ENDPOINT, fetchImpl = globalThis.fetch }) {
-  if (STATIC) throw new GeneratorUnavailable(t('Cet aperçu fonctionne sans serveur : l’IA n’y est pas branchée.'));
+  if (STATIC) throw new GeneratorUnavailable(t('Le professeur IA n’est pas activé sur ce serveur.'));
   let res;
   try {
     res = await fetchImpl(endpoint, {

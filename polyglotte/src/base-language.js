@@ -3,7 +3,7 @@
 
 import { state, persist, invalidateCourse, base, esc } from './app-state.js';
 import { detectBase, browserLocale, fetchGeoCountry, isBaseLanguage, BASE_LANGUAGES } from './locale.js';
-import { setUiLanguage, cachedTable, fetchTable, t, isRtl, uiLanguage, languageName } from './i18n.js';
+import { setUiLanguage, cachedTable, fetchTable, loadBuiltin, t, isRtl, uiLanguage, languageName } from './i18n.js';
 
 let onChange = () => {};
 
@@ -20,11 +20,12 @@ export function translateStatic(root = document) {
   root.querySelectorAll('[data-t-label]').forEach((el) => el.setAttribute('aria-label', t(el.dataset.tLabel)));
 }
 
-// Hors français et anglais, la traduction de l'interface est demandée au
-// serveur (une seule fois, puis gardée en cache) ; en attendant : anglais.
-function applyUi() {
+// Hors français et anglais, l'interface utilise la traduction livrée avec
+// l'application, sinon celle du serveur (une seule fois, puis gardée en
+// cache) ; en attendant : anglais.
+async function applyUi() {
   const b = base();
-  setUiLanguage(b, cachedTable(b));
+  setUiLanguage(b, (await loadBuiltin(b)) ?? cachedTable(b));
   translateStatic();
   if (uiLanguage() === b) return;
   fetchTable(b).then((table) => {
@@ -35,7 +36,7 @@ function applyUi() {
   });
 }
 
-export function initLocale({ onChange: cb } = {}) {
+export async function initLocale({ onChange: cb } = {}) {
   if (cb) onChange = cb;
   const s = state.settings;
   if (!isBaseLanguage(s.baseLang)) {
@@ -50,7 +51,7 @@ export function initLocale({ onChange: cb } = {}) {
     invalidateCourse();
     persist();
   }
-  applyUi();
+  await applyUi();
   // Sans région dans les réglages du navigateur, le pays de connexion (si
   // l'hébergeur le fournit) affine le choix, tant que l'apprenant n'a rien choisi.
   if (s.baseAuto && s.countrySource !== 'locale' && !state.profile) {
@@ -58,22 +59,20 @@ export function initLocale({ onChange: cb } = {}) {
       if (!geo || !state.settings.baseAuto || state.profile) return;
       const d = detectBase({ ...browserLocale(), geoCountry: geo });
       Object.assign(state.settings, { country: d.country, countrySource: d.source });
-      if (d.base !== base()) {
-        setBase(d.base, { auto: true });
-        onChange();
-      } else persist();
+      if (d.base !== base()) setBase(d.base, { auto: true }).then(onChange);
+      else persist();
     });
   }
 }
 
-export function setBase(id, { auto = false } = {}) {
+export async function setBase(id, { auto = false } = {}) {
   if (!isBaseLanguage(id)) return;
   state.settings.baseLang = id;
   state.settings.baseAuto = auto;
   ensureCourse();
   invalidateCourse();
   persist();
-  applyUi();
+  await applyUi();
 }
 
 // Après un import de sauvegarde.
@@ -81,7 +80,7 @@ export function refreshUi() {
   if (!isBaseLanguage(state.settings.baseLang)) state.settings.baseLang = 'fr';
   ensureCourse();
   invalidateCourse();
-  applyUi();
+  return applyUi();
 }
 
 // Liste des langues de base, chacune écrite dans sa propre langue.

@@ -74,17 +74,20 @@ test('langue de base : validée, et rangée à part dans le cache', async () => 
   assert.equal((await post('/api/generate-unit', { language: { id: 'ja', name: 'Japonais' }, unitId: 'a1-1', base: 'fr' })).status, 503);
 });
 
-test('interface traduite : français et anglais sans IA, autres langues depuis le cache', async () => {
+test('interface traduite : français, anglais et langues intégrées sans IA, autres langues depuis le cache', async () => {
   const { CATALOG, CATALOG_VERSION } = await import('../src/i18n.js');
   const en = await (await fetch(`${base}/api/ui/en`)).json();
   assert.equal(en.strings.Réglages, 'Settings');
   assert.equal(Object.keys(en.strings).length, CATALOG.length);
-  assert.equal((await fetch(`${base}/api/ui/es`)).status, 503);
+  const es = await (await fetch(`${base}/api/ui/es`)).json();
+  assert.equal(es.strings.Réglages, 'Ajustes');
+  assert.equal(Object.keys(es.strings).length, CATALOG.length);
+  assert.equal((await fetch(`${base}/api/ui/ja`)).status, 503);
   assert.equal((await fetch(`${base}/api/ui/la`)).status, 400);
   assert.equal((await fetch(`${base}/api/ui/..%2f..%2fetc`)).status, 404);
   await mkdir(path.join(cacheDir, 'ui'), { recursive: true });
-  await writeFile(path.join(cacheDir, 'ui', `es-${CATALOG_VERSION}.json`), JSON.stringify({ Réglages: 'Ajustes' }));
-  assert.equal((await (await fetch(`${base}/api/ui/es`)).json()).strings.Réglages, 'Ajustes');
+  await writeFile(path.join(cacheDir, 'ui', `ja-${CATALOG_VERSION}.json`), JSON.stringify({ Réglages: '設定' }));
+  assert.equal((await (await fetch(`${base}/api/ui/ja`)).json()).strings.Réglages, '設定');
 });
 
 test('pays de connexion lu dans les en-têtes de l’hébergeur', async () => {

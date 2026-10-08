@@ -76,7 +76,7 @@ export function validateUnit(raw, { langId, unitId, sector = null, base = 'fr' }
 }
 
 export async function requestUnit({ language, unitId, sector = null, base = 'fr', endpoint = DEFAULT_ENDPOINT, fetchImpl = globalThis.fetch }) {
-  if (STATIC) throw new GeneratorUnavailable(t('Cet aperçu fonctionne sans serveur : l’IA n’y est pas branchée.'));
+  if (STATIC) throw new GeneratorUnavailable(t('Cette leçon n’est pas encore disponible hors ligne : elle arrivera dans une prochaine mise à jour.'));
   let res;
   try {
     res = await fetchImpl(endpoint, {

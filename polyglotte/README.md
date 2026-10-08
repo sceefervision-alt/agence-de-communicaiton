@@ -66,13 +66,13 @@ ANTHROPIC_API_KEY=sk-... npm start   # avec leçons générées et professeur IA
 npm test                        # tests (Node ≥ 20)
 ```
 
-**Sans clé d'API**, tout fonctionne sauf les leçons non écrites à la main, la conversation avec Bao et l'interface dans les langues autres que le français et l'anglais (elle s'affiche alors en anglais). Les langues marquées « A1 hors ligne » restent entièrement utilisables par les francophones. L'interface explique clairement ce qui manque.
+**Sans clé d'API**, tout fonctionne sauf les leçons non écrites à la main, la conversation avec Bao et l'interface dans les langues autres que le français, l'anglais, l'espagnol, le portugais, l'allemand, l'italien et l'arabe (elle s'affiche alors en anglais). Les langues marquées « A1 hors ligne » restent entièrement utilisables par les francophones. L'interface explique clairement ce qui manque.
 
 **Avec une clé d'API** (`ANTHROPIC_API_KEY`), le serveur appelle Claude (modèle `claude-opus-5-5`) :
 
 - **Préparer une leçon** : un appel unique par langue et par unité. Le résultat est mis en cache dans `.cache/` et partagé par tous les apprenants. Il faut donc conserver ce dossier entre deux déploiements.
 - **Converser avec Bao** : un appel court par réplique.
-- **Traduire l'interface** : une seule fois par langue de base (hors français et anglais, traduits à la main), à la première visite d'un apprenant de cette langue. Le résultat est mis en cache dans `.cache/ui/` et refait automatiquement quand une phrase de l'interface change.
+- **Traduire l'interface** : une seule fois par langue de base (hors français, anglais, espagnol, portugais, allemand, italien et arabe, intégrés à l'application), à la première visite d'un apprenant de cette langue. Le résultat est mis en cache dans `.cache/ui/` et refait automatiquement quand une phrase de l'interface change.
 - **Limites par adresse IP** : 20 leçons, 150 répliques et 5 traductions d'interface par heure, réglables dans `server/index.mjs`.
 
 **Mise en ligne gratuite (sans IA en direct)** : `npm run build:static` produit une version statique dans `dist/`, sans serveur ni appel à une IA payante. Elle fonctionne avec le contenu intégré (leçons écrites à l'avance, conversation scénarisée avec Bao, interface traduite) et hors ligne. Le dépôt contient un déploiement automatique sur GitHub Pages (`.github/workflows/polyglotte-pages.yml`) : il suffit, une fois, de choisir « GitHub Actions » dans Settings → Pages ; chaque mise à jour de la branche `main` met ensuite le site à jour, à l'adresse `https://<compte>.github.io/<dépôt>/`.
@@ -108,6 +108,7 @@ polyglotte/
 │   ├── base-language.js # applique la langue de base à l'interface et au cours
 │   ├── i18n.js          # traduction de l'interface : t(), pluriels, noms de langues
 │   ├── i18n/en.js       # interface en anglais (référence des autres traductions)
+│   ├── i18n/{es,pt,de,it,ar}.js # interface intégrée, sans IA ni réseau
 │   ├── reveal.js        # ouverture des coffres et cadeaux, nouveau niveau
 │   ├── confetti.js
 │   ├── curriculum.js    # programme A1 → C2 (54 compétences)
@@ -145,4 +146,4 @@ Pour ajouter une langue au catalogue, ajoutez une ligne dans `src/languages.js`.
 
 Le texte de l'interface est écrit en français directement dans le code, entouré de `t('…')` (ou `tn(n, '… singulier', '… pluriel')`, ou `N('…')` pour une constante traduite à l'affichage). Les variables s'écrivent entre accolades : `t('Unité {n}', { n: 3 })`.
 
-Après avoir ajouté ou modifié une phrase, ajoutez sa traduction dans `src/i18n/en.js` : `node scripts/i18n-keys.mjs` liste celles qui manquent, et un test échoue tant qu'il en manque une. Les autres langues sont traduites automatiquement par le serveur à partir du français et de l'anglais ; une traduction qui perd une variable ou une balise est écartée et remplacée par l'anglais.
+Après avoir ajouté ou modifié une phrase, ajoutez sa traduction dans `src/i18n/en.js` : `node scripts/i18n-keys.mjs` liste celles qui manquent, et un test échoue tant qu'il en manque une. L'espagnol, le portugais, l'allemand, l'italien et l'arabe sont intégrés (`src/i18n/<langue>.js`) : un test échoue si l'une de ces tables oublie une phrase. Les autres langues sont traduites automatiquement par le serveur à partir du français et de l'anglais ; une traduction qui perd une variable ou une balise est écartée et remplacée par l'anglais.

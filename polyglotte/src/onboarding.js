@@ -67,8 +67,8 @@ function stepHello() {
       <button class="btn primary big" id="next">${t('Faire connaissance — 30 secondes')}</button>`,
   });
   // Changer de langue de base retraduit aussitôt tout l'accueil.
-  $('#base-pick').addEventListener('change', (e) => {
-    setBase(e.target.value);
+  $('#base-pick').addEventListener('change', async (e) => {
+    await setBase(e.target.value);
     if (draft.course === base()) draft.course = state.settings.course;
     renderWelcome();
   });
