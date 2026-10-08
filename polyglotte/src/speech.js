@@ -11,19 +11,29 @@ export function canRecognize() {
 
 function pickVoice(lang) {
   const voices = window.speechSynthesis.getVoices();
+  if (!lang) return null;
   const short = lang.split('-')[0];
   return voices.find((v) => v.lang === lang) || voices.find((v) => v.lang?.startsWith(short)) || null;
 }
 
+// Lit un texte à voix haute ; la promesse se résout à la fin de la lecture.
 export function speak(text, lang, { rate = 0.95 } = {}) {
-  if (!canSpeak()) return;
+  if (!canSpeak() || !text) return Promise.resolve();
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = lang;
+  if (lang) u.lang = lang;
   u.rate = rate;
-  const voice = pickVoice(lang);
+  const voice = lang ? pickVoice(lang) : null;
   if (voice) u.voice = voice;
-  window.speechSynthesis.speak(u);
+  return new Promise((resolve) => {
+    u.onend = resolve;
+    u.onerror = resolve;
+    window.speechSynthesis.speak(u);
+  });
+}
+
+export function stopSpeaking() {
+  if (canSpeak()) window.speechSynthesis.cancel();
 }
 
 // Renvoie les transcriptions candidates (de la plus probable à la moins probable).

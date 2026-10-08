@@ -2,15 +2,10 @@
 // de grammaire courte, des phrases utiles et un dialogue pour le jeu de rôle.
 
 export default {
-  id: 'es',
-  name: 'Espagnol',
-  speechLang: 'es-ES',
-  specialChars: ['á', 'é', 'í', 'ó', 'ú', 'ñ', 'ü', '¿', '¡'],
   units: [
     {
-      id: 'es-1',
-      title: 'Premiers contacts',
-      canDo: 'Je peux saluer quelqu’un et me présenter.',
+      id: 'a1-1',
+      fact: 'En Espagne, on se fait deux bises pour se saluer (en commençant par la joue droite), même lors d’une première rencontre.',
       grammar: {
         title: 'Se présenter, sans pronom',
         body: [
@@ -41,9 +36,8 @@ export default {
       ],
     },
     {
-      id: 'es-2',
-      title: 'Au café',
-      canDo: 'Je peux commander à boire, à manger, et demander l’addition.',
+      id: 'a1-2',
+      fact: 'En Espagne, « un café solo » est un expresso et « un cortado » un expresso avec un nuage de lait. Dans beaucoup de bars, une petite tapa est offerte avec la boisson.',
       grammar: {
         title: 'Commander poliment et le genre des noms',
         body: [
@@ -75,9 +69,8 @@ export default {
       ],
     },
     {
-      id: 'es-3',
-      title: 'En ville',
-      canDo: 'Je peux demander mon chemin et comprendre une indication simple.',
+      id: 'a1-3',
+      fact: 'Presque toutes les villes espagnoles ont une « Plaza Mayor », la grande place centrale : un excellent repère pour s’orienter.',
       grammar: {
         title: 'Estar pour situer, hay pour exister',
         body: [
@@ -108,9 +101,8 @@ export default {
       ],
     },
     {
-      id: 'es-4',
-      title: 'Ma journée',
-      canDo: 'Je peux décrire ma routine quotidienne.',
+      id: 'a1-4',
+      fact: 'Les horaires espagnols sont décalés : déjeuner vers 14 h, dîner vers 21 h ou 22 h. Dîner à 19 h, c’est très tôt !',
       grammar: {
         title: 'Le présent des verbes en -ar, -er, -ir',
         body: [
@@ -141,9 +133,8 @@ export default {
       ],
     },
     {
-      id: 'es-5',
-      title: 'Au marché',
-      canDo: 'Je peux acheter des produits et comprendre un prix.',
+      id: 'a1-5',
+      fact: 'Au marché, on demande « ¿Quién es el último? » (qui est le dernier ?) en arrivant, pour savoir après qui on passe.',
       grammar: {
         title: 'Le pluriel et les nombres',
         body: [

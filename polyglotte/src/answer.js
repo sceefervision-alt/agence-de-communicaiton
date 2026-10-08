@@ -34,7 +34,9 @@ export function normalize(s, lang) {
       .join(' ')
       .replace(/\bcan not\b/g, 'cannot');
   }
-  return out;
+  if (lang === 'de') out = out.replace(/ß/g, 'ss');
+  // Apostrophe finale facultative (it. « po' », « un po » tapé sans apostrophe).
+  return out.replace(/'(?=\s|$)/g, '').trim();
 }
 
 export function levenshtein(a, b) {

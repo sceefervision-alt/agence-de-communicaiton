@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { weeklyStatus, logActivity, unitProgress, dateKey } from '../src/progress.js';
 import { load, save, importJSON, exportJSON, defaultState } from '../src/storage.js';
-import { COURSES } from '../src/data/index.js';
+import { buildCourse } from '../src/course.js';
 
 // Jeudi 8 octobre 2026
 const THU = new Date('2026-10-08T10:00:00').getTime();
@@ -28,7 +28,7 @@ test('logActivity cumule les réponses du jour', () => {
 });
 
 test('compétence « Je peux… » validée à 80 %', () => {
-  const unit = COURSES.es.units[0];
+  const unit = buildCourse('es').units[0];
   const cards = {};
   unit.items.slice(0, 8).forEach((it) => (cards[it.id] = { stage: 3 }));
   assert.equal(unitProgress(unit, cards).canDo, true);

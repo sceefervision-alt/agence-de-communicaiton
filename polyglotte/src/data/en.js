@@ -2,15 +2,10 @@
 // acceptées : la vérification des réponses les développe automatiquement.
 
 export default {
-  id: 'en',
-  name: 'Anglais',
-  speechLang: 'en-GB',
-  specialChars: [],
   units: [
     {
-      id: 'en-1',
-      title: 'Premiers contacts',
-      canDo: 'Je peux saluer quelqu’un et me présenter.',
+      id: 'a1-1',
+      fact: 'En Angleterre, « How are you? » est souvent une simple formule : on répond « Fine, thanks » sans raconter sa journée.',
       grammar: {
         title: 'To be et les contractions',
         body: [
@@ -41,9 +36,8 @@ export default {
       ],
     },
     {
-      id: 'en-2',
-      title: 'Au café',
-      canDo: 'Je peux commander à boire, à manger, et demander l’addition.',
+      id: 'a1-2',
+      fact: 'Au Royaume-Uni, dans les pubs, on commande et on paie directement au bar : il n’y a généralement pas de service à table.',
       grammar: {
         title: 'Commander poliment',
         body: [
@@ -74,9 +68,8 @@ export default {
       ],
     },
     {
-      id: 'en-3',
-      title: 'En ville',
-      canDo: 'Je peux demander mon chemin et comprendre une indication simple.',
+      id: 'a1-3',
+      fact: 'Au Royaume-Uni, on roule à gauche : en traversant, regardez d’abord à droite. C’est souvent écrit au sol : « Look right ».',
       grammar: {
         title: 'Is there…? et les directions',
         body: [
@@ -107,9 +100,8 @@ export default {
       ],
     },
     {
-      id: 'en-4',
-      title: 'Ma journée',
-      canDo: 'Je peux décrire ma routine quotidienne.',
+      id: 'a1-4',
+      fact: 'Dans le nord de l’Angleterre, « tea » peut aussi désigner le repas du soir.',
       grammar: {
         title: 'Le présent simple',
         body: [
@@ -140,9 +132,8 @@ export default {
       ],
     },
     {
-      id: 'en-5',
-      title: 'Au marché',
-      canDo: 'Je peux acheter des produits et comprendre un prix.',
+      id: 'a1-5',
+      fact: 'Au Royaume-Uni, le symbole se place avant le prix et le point sert de séparateur décimal : £3.50.',
       grammar: {
         title: 'Le pluriel et les prix',
         body: [

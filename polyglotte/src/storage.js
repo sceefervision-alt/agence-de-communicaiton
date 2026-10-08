@@ -1,5 +1,7 @@
-// Stockage local : pas de compte, pas de serveur. La progression appartient à
-// l'utilisateur et peut être exportée / importée en JSON.
+// Stockage local : pas de compte. La progression appartient à l'utilisateur
+// et peut être exportée / importée en JSON.
+
+import { defaultRewards } from './rewards.js';
 
 const KEY = 'polyglotte:v1';
 
@@ -17,6 +19,9 @@ export function defaultState() {
     cards: {}, // { [courseId]: { [itemId]: carte } }
     custom: {}, // { [courseId]: [{ id, fr, target, alts }] }
     extraAlts: {}, // { [courseId]: { [itemId]: [réponses acceptées par l'utilisateur] } }
+    generated: {}, // { [courseId]: { [unitId]: unité générée par l'IA } }
+    customLanguages: [], // langues ajoutées par leur nom
+    rewards: defaultRewards(),
     log: { days: {} },
   };
 }
@@ -31,6 +36,13 @@ export function mergeState(raw) {
     cards: raw.cards ?? {},
     custom: raw.custom ?? {},
     extraAlts: raw.extraAlts ?? {},
+    generated: raw.generated ?? {},
+    customLanguages: Array.isArray(raw.customLanguages) ? raw.customLanguages : [],
+    rewards: {
+      ...base.rewards,
+      ...(raw.rewards ?? {}),
+      stats: { ...base.rewards.stats, ...(raw.rewards?.stats ?? {}) },
+    },
     log: { days: raw.log?.days ?? {} },
   };
 }

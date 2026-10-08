@@ -66,3 +66,26 @@ export function unitProgress(unit, cards) {
   const started = unit.items.filter((it) => (cards[it.id]?.stage ?? 0) > 0).length;
   return { known, started, total: n, ratio: n ? known / n : 0, canDo: n > 0 && known / n >= 0.8 };
 }
+
+// Un niveau est terminé quand 4 de ses 5 compétences sont validées.
+// Le niveau en cours (et la tenue de Bao) en découle.
+export function levelStatus(course, cards) {
+  const levels = course.levels.map((l) => {
+    const done = l.units.filter((u) => unitProgress(u, cards).canDo).length;
+    return { id: l.id, cefr: l.cefr, name: l.name, done, total: l.units.length, complete: done >= Math.ceil(l.units.length * 0.8) };
+  });
+  let levelsDone = levels.findIndex((l) => !l.complete);
+  if (levelsDone === -1) levelsDone = levels.length;
+  const current = Math.min(levelsDone, levels.length - 1);
+  return {
+    levels,
+    levelsDone,
+    current,
+    unitsDone: levels.reduce((a, l) => a + l.done, 0),
+    ratio: levels[current].done / Math.ceil(levels[current].total * 0.8),
+  };
+}
+
+export function recalledCount(items, cards) {
+  return items.filter((it) => (cards[it.id]?.stage ?? 0) >= 3).length;
+}

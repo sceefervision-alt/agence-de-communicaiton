@@ -18,7 +18,10 @@ l'application.
 | 9 | **Répétition espacée invisible** | On ne sait pas ce qu'il faut réviser ni quand ; les révisions ne ciblent pas ses faiblesses | **Répétition espacée transparente** (algorithme type SM-2) : nombre de révisions dues, prévision, révisions prioritaires sur les éléments ratés | `src/srs.js` |
 | 10 | **Pas de vocabulaire personnel** | Impossible d'apprendre les mots dont *on* a besoin (travail, voyage…) | **Mon vocabulaire** : on ajoute ses propres mots, intégrés à la répétition espacée | vue Vocabulaire |
 | 11 | **Données captives, compte obligatoire** | Dépendance à la plateforme | **Sans compte, hors ligne (PWA)**, progression stockée localement et **exportable / importable** en JSON | `src/storage.js`, `sw.js` |
-| 12 | **Écoute et oral secondaires** | On lit bien mais on ne comprend pas à l'oral | Exercices de **dictée** (synthèse vocale) et de **prononciation** (reconnaissance vocale quand le navigateur la supporte) | `src/speech.js` |
+| 12 | **Écoute et oral secondaires** | On lit bien mais on ne comprend pas à l'oral | Exercices de **dictée** et de **prononciation**, et surtout **conversation orale avec Bao, professeur IA**, qui corrige et relance | `src/speech.js`, `src/chat-view.js`, `server/claude.mjs` |
+| 13 | **Plafond vers A2 / B1, peu de langues bien couvertes** | Les apprenants avancés n'ont plus rien à apprendre | Programme commun **A1 → C2** (jusqu'au niveau « Senior »), **45 langues** et n'importe quelle autre, leçons générées par l'IA puis vérifiées | `src/curriculum.js`, `src/languages.js`, `src/generator.js` |
+| 14 | **Mascotte qui culpabilise** (le hibou et ses rappels insistants) | Rapport anxiogène à l'application | **Bao**, un panda qui encourage par ses gestes et ses expressions, sans jamais menacer ; il grandit avec l'apprenant | `src/panda.js` |
+| 15 | **Récompenses déconnectées de l'apprentissage** (XP pour refaire des leçons faciles) | On joue au lieu d'apprendre | **Bambous** gagnés uniquement par l'apprentissage réel, boutique cosmétique, trophées, défi du jour facultatif | `src/rewards.js` |
 
 ## Principes pédagogiques retenus
 
@@ -31,7 +34,8 @@ l'application.
 ## Ce qui reste à faire (pistes v2)
 
 - Comptes optionnels et synchronisation multi-appareils.
-- Conversation libre avec un tuteur IA (correction expliquée des phrases libres).
-- Contenus authentiques gradués (articles, podcasts courts) au-delà du niveau A2.
-- Plus de langues et d'unités, éditeur de contenu pour les enseignants.
+- Contenus authentiques gradués (articles, podcasts courts) en complément des unités.
+- Relecture humaine des leçons générées pour les langues les plus demandées, éditeur de contenu pour les enseignants.
+- Interface traduite pour les apprenants non francophones.
+- Voix de synthèse premium côté serveur pour les langues mal couvertes par les navigateurs.
 - Algorithme FSRS à la place de SM-2 une fois assez de données collectées.

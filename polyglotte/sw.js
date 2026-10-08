@@ -1,5 +1,5 @@
 // Service worker : l'application fonctionne entièrement hors ligne.
-const CACHE = 'polyglotte-v2';
+const CACHE = 'polyglotte-v3';
 const FILES = [
   './',
   'index.html',
@@ -7,15 +7,29 @@ const FILES = [
   'manifest.webmanifest',
   'icons/icon.svg',
   'src/main.js',
+  'src/app-state.js',
+  'src/session-view.js',
+  'src/chat-view.js',
+  'src/bao-view.js',
   'src/answer.js',
   'src/srs.js',
   'src/session.js',
   'src/progress.js',
   'src/storage.js',
   'src/speech.js',
+  'src/panda.js',
+  'src/rewards.js',
+  'src/course.js',
+  'src/curriculum.js',
+  'src/languages.js',
+  'src/generator.js',
+  'src/tutor.js',
   'src/data/index.js',
   'src/data/es.js',
   'src/data/en.js',
+  'src/data/de.js',
+  'src/data/it.js',
+  'src/data/pt.js',
 ];
 
 self.addEventListener('install', (event) => {
@@ -33,7 +47,7 @@ self.addEventListener('activate', (event) => {
 
 // Réseau d'abord (pour recevoir les mises à jour), cache en secours.
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
+  if (event.request.method !== 'GET' || new URL(event.request.url).pathname.includes('/api/')) return;
   event.respondWith(
     fetch(event.request)
       .then((res) => {
