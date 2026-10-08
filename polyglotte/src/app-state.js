@@ -7,6 +7,7 @@ import { findLanguage } from './languages.js';
 import { weeklyStatus, levelStatus, recalledCount, logActivity } from './progress.js';
 import { sessionEarnings, applyEarnings, newTrophies } from './rewards.js';
 import { panda } from './panda.js';
+import { baoSlot } from './visual.js';
 import { speak, canSpeak, canRecognize } from './speech.js';
 
 export let state = store.load();
@@ -68,8 +69,10 @@ export function invalidateCourse() {
 }
 
 export function course() {
-  if (!courseCache || courseCache.id !== state.settings.course) {
-    courseCache = buildCourse(state.settings.course, { generated: state.generated, customLanguages: state.customLanguages }) ?? buildCourse('es');
+  const sector = state.profile?.sector ?? null;
+  if (!courseCache || courseCache.id !== state.settings.course || courseCache.sector !== sector) {
+    const opts = { generated: state.generated, customLanguages: state.customLanguages, sector };
+    courseCache = { ...(buildCourse(state.settings.course, opts) ?? buildCourse('es', opts)), sector };
   }
   return courseCache;
 }
@@ -90,8 +93,21 @@ export const level = () => levelStatus(course(), cards());
 export const stage = () => Math.min(5, level().levelsDone);
 
 // Bao, habillé selon le niveau et la boutique.
+// Bao : 3D (animé pour les grands formats, vignette pour les petits), avec
+// sa version 2D en secours tant que la 3D n'est pas chargée.
 export function bao(mood = 'happy', size = 120, extra = {}) {
-  return panda({ mood, size, stage: extra.stage ?? stage(), equipped: state.rewards.equipped, label: extra.label ?? '', className: extra.className ?? '' });
+  const st = extra.stage ?? stage();
+  const equipped = extra.equipped ?? state.rewards.equipped;
+  return baoSlot({
+    mood,
+    size,
+    stage: st,
+    equipped,
+    live: extra.live,
+    label: extra.label ?? '',
+    className: extra.className ?? '',
+    fallback: panda({ mood, size, stage: st, equipped }),
+  });
 }
 
 export function baoSays(mood, text, { size = 110, className = '' } = {}) {
@@ -172,14 +188,6 @@ export function finishActivity({ before, summary }) {
 export function rewardsHtml({ gains, trophies, levelUp, after }) {
   const total = gains.reduce((a, g) => a + g.amount, 0);
   let html = '';
-  if (levelUp) {
-    const lv = course().levels[Math.min(after.levelsDone, 5)];
-    html += `<section class="card levelup">
-      ${bao('cheer', 150)}
-      <div><p class="eyebrow">Nouveau niveau</p><h2>Bao a grandi !</h2>
-      <p>Vous passez au niveau ${esc(lv.cefr)} · ${esc(lv.name)}. Regardez sa nouvelle tenue — et l’interface s’enrichit avec vous.</p></div>
-    </section>`;
-  }
   if (total > 0) {
     html += `<section class="card gains"><div class="row spread"><h2>Bonus gagnés</h2><span class="bamboo-pill big">${bambooIcon(20)} +${total}</span></div>
       <ul class="gain-list">${gains.map((g) => `<li class="${g.chest ? 'chest' : ''}"><span>${esc(g.reason)}</span><strong>+${g.amount}</strong></li>`).join('')}</ul>

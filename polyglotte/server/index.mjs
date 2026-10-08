@@ -11,7 +11,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Anthropic from '@anthropic-ai/sdk';
 import { LANGUAGES, customLanguage } from '../src/languages.js';
-import { findUnit, findLevel } from '../src/curriculum.js';
+import { findUnit, findLevel, findSector, findGoal } from '../src/curriculum.js';
 import { validateUnit } from '../src/generator.js';
 import { validateTutorReply, trimHistory } from '../src/tutor.js';
 import { generateUnit, tutorReply, isConfigured } from './claude.mjs';
@@ -33,7 +33,7 @@ const TYPES = {
   '.ico': 'image/x-icon',
   '.md': 'text/markdown; charset=utf-8',
 };
-const PUBLIC = [/^\/index\.html$/, /^\/styles\.css$/, /^\/sw\.js$/, /^\/manifest\.webmanifest$/, /^\/icons\/[\w.-]+$/, /^\/src\/[\w/.-]+\.js$/];
+const PUBLIC = [/^\/index\.html$/, /^\/styles\.css$/, /^\/sw\.js$/, /^\/manifest\.webmanifest$/, /^\/icons\/[\w.-]+$/, /^\/src\/[\w/.-]+\.js$/, /^\/vendor\/[\w.-]+\.js$/];
 
 // ---------- Limitation de débit (par adresse IP, en mémoire) ----------
 
@@ -112,8 +112,11 @@ async function handleUnit(req, res) {
   const unit = findUnit(body.unitId);
   if (!language) return send(res, 400, { error: 'bad-language', message: 'Nom de langue invalide.' });
   if (!unit) return send(res, 400, { error: 'bad-unit', message: 'Unité inconnue.' });
+  // Seules les unités « Mon métier » dépendent du secteur (liste fermée).
+  const sector = unit.track === 'metier' ? findSector(body.sector) : null;
+  if (unit.track === 'metier' && body.sector && !sector) return send(res, 400, { error: 'bad-sector', message: 'Secteur inconnu.' });
 
-  const file = path.join(CACHE_DIR, 'units', language.id, `${unit.id}.json`);
+  const file = path.join(CACHE_DIR, 'units', language.id, `${unit.id}${unit.track === 'metier' ? `--${sector?.id ?? 'general'}` : ''}.json`);
   try {
     return send(res, 200, { unit: JSON.parse(await readFile(file, 'utf8')), cached: true });
   } catch {
@@ -122,13 +125,13 @@ async function handleUnit(req, res) {
   if (!isConfigured()) return send(res, 503, { error: 'not-configured' });
   if (!allow('unit', clientIp(req))) return send(res, 429, { message: 'Beaucoup de leçons préparées en peu de temps : réessayez dans un moment.' });
 
-  const key = `${language.id}/${unit.id}`;
+  const key = `${language.id}/${unit.id}/${sector?.id ?? ''}`;
   if (!inflight.has(key)) {
     inflight.set(
       key,
       (async () => {
-        const raw = await generateUnit({ language, level: findLevel(unit.levelId), unit });
-        const valid = validateUnit(raw, { langId: language.id, unitId: unit.id });
+        const raw = await generateUnit({ language, level: findLevel(unit.levelId), unit, sector });
+        const valid = validateUnit(raw, { langId: language.id, unitId: unit.id, sector: sector?.id ?? (unit.track === 'metier' ? 'general' : null) });
         await mkdir(path.dirname(file), { recursive: true });
         await writeFile(file, JSON.stringify(valid));
         return valid;
@@ -150,7 +153,8 @@ async function handleTutor(req, res) {
   if (!isConfigured()) return send(res, 503, { error: 'not-configured' });
   if (!allow('tutor', clientIp(req))) return send(res, 429, { message: 'Faisons une petite pause : réessayez dans quelques minutes.' });
 
-  const raw = await tutorReply({ language, level, unit, history: trimHistory(body.history) });
+  const profile = { sector: findSector(body.sector), goal: findGoal(body.goal) };
+  const raw = await tutorReply({ language, level, unit, profile, history: trimHistory(body.history) });
   send(res, 200, validateTutorReply(raw));
 }
 

@@ -4,5 +4,8 @@ import en from './en.js';
 import de from './de.js';
 import it from './it.js';
 import pt from './pt.js';
+import pro from './pro-a1.js';
 
-export const CURATED = { es, en, de, it, pt };
+const withPro = (lang, base) => ({ units: [...base.units, ...(pro[lang] ?? [])] });
+
+export const CURATED = { es: withPro('es', es), en: withPro('en', en), de: withPro('de', de), it: withPro('it', it), pt: withPro('pt', pt) };

@@ -1,16 +1,22 @@
 # Polyglotte
 
-Une application web pour apprendre **n'importe quelle langue**, du niveau **débutant (A1)** au niveau **senior (C2)**. Elle part des failles de Duolingo et les corrige une par une. On y apprend avec **Bao**, un petit panda qui est à la fois mascotte et **professeur IA à l'oral**.
+Une application web pour apprendre **n'importe quelle langue**, du niveau **débutant (A1)** au niveau **senior (C2)**. Elle est pensée pour les **professionnels qui voyagent** et part des failles de Duolingo pour les corriger une par une. On y apprend avec **Bao**, un panda en 3D façon dessin animé, qui est à la fois mascotte et **professeur IA à l'oral**.
 
 > Analyse détaillée des failles de Duolingo et des choix produit : [`docs/ANALYSE-DUOLINGO.md`](docs/ANALYSE-DUOLINGO.md)
 
 ## Les grandes fonctions
 
 - **Toutes les langues** : 45 langues au catalogue (européennes, asiatiques, africaines, créole, latin, espéranto…), plus n'importe quelle autre ajoutée par son nom.
-- **Du débutant au senior** : un programme commun de 6 niveaux (A1 Débutant → C2 Senior) et 30 compétences « Je peux… ».
-- **Leçons écrites à la main** pour le niveau A1 en anglais, espagnol, allemand, italien et portugais. Elles fonctionnent hors ligne.
+- **Du débutant au senior** : un programme commun de 6 niveaux (A1 Débutant → C2 Senior) et 54 compétences « Je peux… », réparties en trois pistes à chaque niveau :
+  - **Vie quotidienne** : se présenter, café, ville, journée, marché…
+  - **Pro & voyages** : aéroport, hôtel en déplacement, se présenter au travail, téléphone, salons, e-mails, dîners d'affaires, visioconférence, contrats, négociation, conférence…
+  - **Mon métier** : le vocabulaire du secteur choisi par l'apprenant (16 secteurs : tech, santé, finance, commerce, industrie, juridique…).
+- **Accueil personnalisé** : à la première ouverture, Bao demande la langue, le secteur professionnel et l'objectif de l'apprenant. Le secteur personnalise les leçons « Mon métier » et les conversations.
+- **Leçons écrites à la main** pour le niveau A1 (vie quotidienne et Pro & voyages) en anglais, espagnol, allemand, italien et portugais. Elles fonctionnent hors ligne.
 - **Leçons générées par l'IA** pour tout le reste. La langue et le niveau sont imposés par le programme, puis le contenu est vérifié automatiquement. Une fois générée, une leçon est mise en cache et partagée par tous les apprenants.
 - **Bao, professeur IA à l'oral** : on parle au micro (ou on écrit) dans la langue apprise. Bao répond à voix haute, corrige avec bienveillance (« Plus naturel : … ») et propose des idées de réponse. Un mode **mains libres** permet de converser sans toucher l'écran.
+- **3D façon dessin animé (cel-shading)** : Bao, son jardin, les coffres et les cadeaux sont en 3D temps réel (Three.js), avec un ombrage en aplats et des contours encrés, comme dans les jeux Naruto Storm ou les animations de Duolingo. Bao respire, cligne des yeux, suit le curseur du regard et sautille quand on le touche.
+- **Animation d'ouverture** : les bambous poussent, Bao tombe du ciel, rebondit et salue, puis le logo apparaît.
 - **Bao, communication non verbale** : il apparaît sur chaque écran avec 12 expressions et gestes. Il fait coucou à l'accueil, réfléchit pendant une question, applaudit une bonne réponse, console après une erreur, lit pendant la grammaire, écoute pendant la dictée et dort quand il n'y a rien à faire.
 - **Une interface qui progresse avec l'apprenant** :
   - Bao reçoit une nouvelle tenue à chaque niveau : pousse de bambou, écharpe, lunettes, béret, nœud papillon, chapeau de diplômé.
@@ -18,7 +24,7 @@ Une application web pour apprendre **n'importe quelle langue**, du niveau **déb
   - Les statistiques et les prévisions apparaissent quand elles deviennent utiles.
 - **Bonus** :
   - Des bambous gagnés en apprenant vraiment : éléments ancrés, compétences validées, niveau terminé, objectif de la semaine, défi du jour.
-  - Un coffre surprise chaque semaine.
+  - Un coffre surprise chaque semaine et un cadeau pour chaque défi du jour, à ouvrir en 3D, avec pluie de confettis.
   - Une boutique pour habiller Bao et décorer son jardin.
   - 18 trophées.
   - Des anecdotes culturelles débloquées en validant une compétence.
@@ -64,6 +70,8 @@ npm test                        # tests (Node ≥ 20)
 
 **Mise en ligne** : il faut un hébergement Node.js qui garde un processus allumé (Render, Railway, Fly.io, un VPS…). La génération d'une leçon prend 30 à 90 secondes, ce qui dépasse les limites de durée des fonctions serverless classiques.
 
+**3D** : Three.js est embarqué dans `vendor/three.js` (191 Ko compressé), donc aucune connexion à un CDN n'est nécessaire. Pour le regénérer : `npm run build:vendor`. Sans WebGL, l'application affiche automatiquement les versions 2D de Bao et du jardin. Un seul contexte WebGL dessine toutes les scènes, et celles qui sont hors écran sont mises en pause. Le mode « réduire les animations » du système est respecté.
+
 **Audio** : la voix de Bao et la dictée utilisent la synthèse vocale du navigateur. Le micro (exercices oraux, conversation) utilise la reconnaissance vocale, disponible dans Chrome et Edge. Sans elle, la conversation se fait à l'écrit.
 
 ## Structure
@@ -80,7 +88,13 @@ polyglotte/
 │   ├── chat-view.js     # conversation orale avec Bao, le professeur IA
 │   ├── bao-view.js      # boutique, jardin, évolution, trophées
 │   ├── app-state.js     # état partagé, composants, calcul des bonus en fin d'activité
-│   ├── panda.js         # Bao en SVG : 12 humeurs, 6 tenues, accessoires, jardin
+│   ├── panda.js         # Bao en 2D (secours sans WebGL)
+│   ├── three/           # 3D cel-shading : moteur partagé, Bao, jardin, coffres, ouverture
+│   ├── visual.js        # place Bao et le jardin 3D dans l'interface (avec secours 2D)
+│   ├── splash.js        # animation d'ouverture
+│   ├── onboarding.js    # questionnaire de bienvenue (langue, secteur, objectif)
+│   ├── reveal.js        # ouverture des coffres et cadeaux, nouveau niveau
+│   ├── confetti.js
 │   ├── curriculum.js    # programme A1 → C2 (30 compétences)
 │   ├── languages.js     # catalogue des langues
 │   ├── course.js        # assemble programme + contenu écrit + contenu généré
@@ -92,8 +106,9 @@ polyglotte/
 │   ├── session.js       # construction des sessions
 │   ├── progress.js      # objectif hebdomadaire, niveaux, statistiques
 │   ├── storage.js, speech.js
-│   └── data/            # A1 écrit à la main : es, en, de, it, pt
-├── tests/               # 52 tests (node --test)
+│   └── data/            # A1 écrit à la main : es, en, de, it, pt (+ pro-a1.js)
+├── vendor/three.js      # Three.js embarqué (npm run build:vendor)
+├── tests/               # tests (node --test)
 └── docs/ANALYSE-DUOLINGO.md
 ```
 

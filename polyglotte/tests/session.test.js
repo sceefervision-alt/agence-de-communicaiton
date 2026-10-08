@@ -84,7 +84,8 @@ test('contenu écrit à la main : ids uniques et chaque réponse attendue se val
   for (const langId of Object.keys(CURATED)) {
     const course = buildCourse(langId);
     const ready = course.units.filter((u) => u.ready);
-    assert.equal(ready.length, 5, `${langId} : niveau A1 complet`);
+    assert.equal(ready.length, 8, `${langId} : niveau A1 (quotidien + pro) complet`);
+    assert.equal(ready.filter((u) => u.track === 'pro').length, 3);
     for (const unit of ready) {
       assert.ok(unit.canDo && unit.grammar?.body?.length && unit.dialogue?.length && unit.fact, `${langId} ${unit.id}`);
       assert.ok(unit.dialogue.filter((l) => l.who === 'you').length >= 2);

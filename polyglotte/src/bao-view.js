@@ -1,17 +1,20 @@
 // L'univers de Bao : boutique d'accessoires, jardin, trophées et évolution.
 
 import { SHOP, TROPHIES, buy, toggleEquip } from './rewards.js';
-import { panda, garden, STAGES } from './panda.js';
+import { garden, STAGES } from './panda.js';
 import { recalledCount } from './progress.js';
 import { LEVELS } from './curriculum.js';
 import { state, app, persist, esc, $$, toast, icon, bambooIcon, bao, stage, level, items, cards, updateBambooCounter } from './app-state.js';
+import { gardenSlot } from './visual.js';
+import { reveal } from './reveal.js';
 
 const SLOT_LABEL = { head: 'Chapeaux', eyes: 'Lunettes', neck: 'Cou', garden: 'Jardin' };
 const STAGE_GIFTS = ['Une pousse de bambou', 'Une écharpe', 'Des lunettes', 'Un béret', 'Un nœud papillon', 'Le chapeau de diplômé'];
 
 export function gardenScene() {
   const stalks = 2 + Math.floor(recalledCount(items(), cards()) / 3);
-  return `<div class="garden-wrap">${garden({ stalks, level: stage(), decor: state.rewards.garden })}<div class="garden-bao">${bao(stalks > 4 ? 'happy' : 'hello', 92)}</div></div>`;
+  const fallback = `${garden({ stalks, level: stage(), decor: state.rewards.garden })}<div class="garden-bao">${bao(stalks > 4 ? 'happy' : 'hello', 92, { live: false })}</div>`;
+  return `<div class="garden-wrap">${gardenSlot({ stalks, level: stage(), decor: state.rewards.garden, mood: stalks > 4 ? 'happy' : 'hello', stage: stage(), equipped: state.rewards.equipped }, fallback)}</div>`;
 }
 
 export function renderBao() {
@@ -26,7 +29,7 @@ export function renderBao() {
     const preview =
       item.slot === 'garden'
         ? `<div class="shop-garden">${garden({ stalks: 2, level: st, decor: [item.id], width: 220, height: 110 })}</div>`
-        : panda({ mood: 'happy', size: 96, stage: st, equipped: { ...r.equipped, [item.slot]: item.id } });
+        : bao('happy', 96, { live: false, stage: st, equipped: { ...r.equipped, [item.slot]: item.id } });
     return `<div class="shop-item ${worn ? 'worn' : ''}">
       ${preview}
       <strong>${esc(item.name)}</strong>
@@ -60,7 +63,7 @@ export function renderBao() {
       <div class="evolution">
         ${STAGES.map(
           (_, i) => `<div class="evo ${i <= st ? 'reached' : 'locked'}">
-            ${panda({ mood: i <= st ? 'happy' : 'sleep', size: 84, stage: i })}
+            ${bao(i <= st ? 'happy' : 'sleep', 84, { live: false, stage: i, equipped: {} })}
             <strong>${esc(LEVELS[i].cefr)}</strong>
             <span class="small muted">${i <= st ? esc(STAGE_GIFTS[i]) : `${icon('lock', 12)} ${esc(STAGE_GIFTS[i])}`}</span>
           </div>`,
@@ -90,8 +93,16 @@ export function renderBao() {
         if (!state.rewards.trophies.style) state.rewards.trophies.style = new Date().toISOString().slice(0, 10);
         persist();
         updateBambooCounter();
-        toast('Bao adore son cadeau !');
         renderBao();
+        const item = SHOP.find((i) => i.id === b.dataset.buy);
+        reveal({
+          kind: 'gift',
+          color: 0xffb3c7,
+          eyebrow: 'Boutique',
+          title: 'Un cadeau pour Bao',
+          text: item.slot === 'garden' ? `${item.name} rejoint le jardin de Bao.` : `Bao adore son nouvel accessoire : ${item.name.toLowerCase()} !`,
+          resultHtml: item.slot === 'garden' ? '' : `<div class="reveal-bao">${bao('cheer', 150, { live: true })}</div>`,
+        });
       } catch (err) {
         toast(err.message);
       }

@@ -46,6 +46,7 @@ test('entrées validées côté serveur', async () => {
   assert.equal((await post('/api/generate-unit', { language: { id: 'ja' }, unitId: 'z9-9' })).status, 400);
   assert.equal((await post('/api/generate-unit', { language: { id: 'x-evil', name: 'quechua' }, unitId: 'a1-1' })).status, 400);
   assert.equal((await post('/api/tutor', { language: { id: 'es' }, history: 'nope' })).status, 400);
+  assert.equal((await post('/api/generate-unit', { language: { id: 'es' }, unitId: 'a1-m', sector: '../../etc' })).status, 400);
   assert.equal((await fetch(`${base}/api/tutor`)).status, 405);
   const big = await post('/api/tutor', { language: { id: 'es' }, history: [{ role: 'user', text: 'x'.repeat(40000) }] });
   assert.equal(big.status, 413);

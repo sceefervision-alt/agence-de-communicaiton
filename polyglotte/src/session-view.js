@@ -5,6 +5,8 @@ import { review, newCard, markKnown } from './srs.js';
 import { checkAnswer, gradeFor } from './answer.js';
 import { buildSession, buildTestOut, buildRoleplay, requeue, acceptedAnswers, TEST_OUT_THRESHOLD } from './session.js';
 import { recognize } from './speech.js';
+import { reveal } from './reveal.js';
+import { confetti } from './confetti.js';
 import {
   state, app, persist, esc, $, $$, toast, icon, course, cards, custom, extraAlts, langName, caps, say, bao,
   audioBtn, bindAudio, targetText, weekWidget, snapshot, finishActivity, rewardsHtml, updateBambooCounter,
@@ -306,7 +308,7 @@ function showFeedback(ex, r) {
   fb.className = `feedback ${r.status}`;
   fb.innerHTML = `
     <div class="feedback-body">
-      <div class="feedback-bao">${bao(f.mood, 84)}</div>
+      <div class="feedback-bao">${bao(f.mood, 96, { live: true })}</div>
       <div>
         <h3>${title}</h3>
         <p>${esc(r.message)}</p>
@@ -413,6 +415,20 @@ function renderSummary() {
   bindAudio();
   S = null;
   document.body.classList.remove('in-session');
+  celebrate(result, rate);
+}
+
+// Grands moments : coffre de la semaine, cadeau du défi, nouveau niveau.
+export function celebrate(result, rate = 100) {
+  const chest = result.gains.filter((g) => g.weekly || g.chest).reduce((a, g) => a + g.amount, 0);
+  const challenge = result.gains.find((g) => g.challenge);
+  if (result.levelUp) {
+    const lv = course().levels[Math.min(result.after.levelsDone, 5)];
+    reveal({ kind: 'level', eyebrow: 'Nouveau niveau', title: 'Bao a grandi !', text: `Vous passez au niveau ${lv.cefr} · ${lv.name}. Nouvelle tenue, nouveau ciel dans le jardin !`, bao: { mood: 'proud', stage: Math.min(5, result.after.levelsDone), equipped: state.rewards.equipped } });
+  }
+  if (chest) reveal({ kind: 'chest', eyebrow: 'Objectif de la semaine', title: 'Le coffre de la semaine', amount: chest, text: 'Votre régularité paie. Bao est fier de vous !' });
+  if (challenge) reveal({ kind: 'gift', eyebrow: 'Défi du jour réussi', title: 'Un cadeau pour vous', amount: challenge.amount, color: 0x8fb0ff });
+  if (!result.levelUp && !chest && !challenge && rate >= 80) confetti({ count: 90 });
 }
 
 document.addEventListener('keydown', (e) => {

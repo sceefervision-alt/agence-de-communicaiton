@@ -1,5 +1,5 @@
 // Service worker : l'application fonctionne entièrement hors ligne.
-const CACHE = 'polyglotte-v3';
+const CACHE = 'polyglotte-v4';
 const FILES = [
   './',
   'index.html',
@@ -30,6 +30,19 @@ const FILES = [
   'src/data/de.js',
   'src/data/it.js',
   'src/data/pt.js',
+  'src/data/pro-a1.js',
+  'src/visual.js',
+  'src/confetti.js',
+  'src/reveal.js',
+  'src/splash.js',
+  'src/onboarding.js',
+  'src/three/engine.js',
+  'src/three/toon.js',
+  'src/three/bao3d.js',
+  'src/three/garden3d.js',
+  'src/three/chest3d.js',
+  'src/three/stage.js',
+  'vendor/three.js',
 ];
 
 self.addEventListener('install', (event) => {

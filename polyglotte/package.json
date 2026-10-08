@@ -6,10 +6,15 @@
   "type": "module",
   "scripts": {
     "start": "node server/index.mjs",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "build:vendor": "esbuild scripts/three-entry.js --bundle --format=esm --minify --legal-comments=eof --outfile=vendor/three.js"
   },
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.132.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "three": "^0.186.1"
   }
 }

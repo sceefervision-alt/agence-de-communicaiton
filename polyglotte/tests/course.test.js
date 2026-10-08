@@ -1,16 +1,31 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildCourse } from '../src/course.js';
-import { LEVELS, ALL_UNITS } from '../src/curriculum.js';
+import { LEVELS, ALL_UNITS, SECTORS, GOALS } from '../src/curriculum.js';
 import { LANGUAGES, customLanguage, isValidLanguageName } from '../src/languages.js';
 import { levelStatus } from '../src/progress.js';
 import { checkAnswer } from '../src/answer.js';
 
-test('programme commun : 6 niveaux de A1 à C2, 30 unités', () => {
+test('programme commun : 6 niveaux de A1 à C2, avec pistes quotidienne, pro et métier', () => {
   assert.deepEqual(LEVELS.map((l) => l.cefr), ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']);
   assert.equal(LEVELS.at(-1).name, 'Senior');
-  assert.equal(ALL_UNITS.length, 30);
-  assert.equal(new Set(ALL_UNITS.map((u) => u.id)).size, 30);
+  assert.equal(ALL_UNITS.length, 54);
+  assert.equal(new Set(ALL_UNITS.map((u) => u.id)).size, 54);
+  for (const l of LEVELS) {
+    assert.equal(l.units.filter((u) => u.track === 'pro').length, 3, l.id);
+    assert.equal(l.units.filter((u) => u.track === 'metier').length, 1, l.id);
+  }
+  assert.ok(SECTORS.length >= 12 && GOALS.length >= 4);
+});
+
+test('« Mon métier » dépend du secteur choisi', () => {
+  const unit = { grammar: { title: 't', body: ['b'] }, items: [{ id: 'es-a1-m-sante-1', fr: 'un patient', target: 'un paciente' }], dialogue: [], fact: null };
+  const generated = { es: { 'a1-m@sante': unit } };
+  const sante = buildCourse('es', { generated, sector: 'sante' }).units.find((u) => u.id === 'a1-m');
+  const tech = buildCourse('es', { generated, sector: 'tech' }).units.find((u) => u.id === 'a1-m');
+  assert.equal(sante.ready, true);
+  assert.equal(tech.ready, false);
+  assert.equal(tech.contentKey, 'a1-m@tech');
 });
 
 test('catalogue : plus de 40 langues aux identifiants uniques', () => {
@@ -21,7 +36,7 @@ test('catalogue : plus de 40 langues aux identifiants uniques', () => {
 
 test('un cours sans contenu écrit à la main attend les leçons de l’IA', () => {
   const ja = buildCourse('ja');
-  assert.equal(ja.units.length, 30);
+  assert.equal(ja.units.length, 54);
   assert.ok(ja.units.every((u) => !u.ready && u.items.length === 0));
   const generated = { ja: { 'a1-1': { grammar: { title: 't', body: ['b'] }, items: [{ id: 'ja-a1-1-1', fr: 'Bonjour', target: 'こんにちは', translit: 'konnichiwa', alts: ['konnichiwa'] }], dialogue: [], fact: null } } };
   const ja2 = buildCourse('ja', { generated });
@@ -40,15 +55,17 @@ test('langue libre : nom validé et identifiant stable', () => {
   assert.ok(buildCourse('x-quechua', { customLanguages: [l] }));
 });
 
-test('niveaux : 4 compétences sur 5 font passer au niveau suivant', () => {
+test('niveaux : les trois quarts des compétences (7 sur 9) font passer au niveau suivant', () => {
   const course = buildCourse('es');
   const cards = {};
+  const ready = course.levels[0].units.filter((u) => u.ready);
+  for (const u of ready.slice(0, 6)) for (const it of u.items) cards[it.id] = { stage: 3 };
   assert.equal(levelStatus(course, cards).levelsDone, 0);
-  for (const u of course.levels[0].units.slice(0, 4)) for (const it of u.items) cards[it.id] = { stage: 3 };
+  for (const it of ready[6].items) cards[it.id] = { stage: 3 };
   const st = levelStatus(course, cards);
   assert.equal(st.levelsDone, 1);
   assert.equal(st.current, 1);
-  assert.equal(st.unitsDone, 4);
+  assert.equal(st.unitsDone, 7);
 });
 
 test('allemand : ß peut être tapé ss ; italien : apostrophe finale facultative', () => {

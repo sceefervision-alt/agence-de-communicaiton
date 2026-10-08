@@ -11,6 +11,10 @@ import {
 import { startSession, endSession, sessionActive } from './session-view.js';
 import { renderChat, endChat } from './chat-view.js';
 import { renderBao, gardenScene } from './bao-view.js';
+import { renderWelcome } from './onboarding.js';
+import { playSplash } from './splash.js';
+import { load3D } from './visual.js';
+import { SECTORS, GOALS, TRACKS, trackOf, levelThreshold, findSector } from './curriculum.js';
 
 // ---------- Routeur ----------
 
@@ -25,6 +29,7 @@ const routes = [
   [/^#\/vocabulaire$/, renderVocab],
   [/^#\/reglages$/, renderSettings],
   [/^#\/pourquoi$/, renderWhy],
+  [/^#\/bienvenue$/, renderWelcome],
 ];
 
 function router() {
@@ -32,6 +37,7 @@ function router() {
   if (sessionActive() && !hash.startsWith('#/session')) endSession();
   if (!hash.startsWith('#/converser')) endChat();
   document.body.classList.remove('in-session');
+  if (!hash.startsWith('#/bienvenue')) document.body.classList.remove('onboarding');
   document.body.dataset.level = String(stage());
   updateBambooCounter();
   for (const [re, fn] of routes) {
@@ -115,9 +121,10 @@ function renderHome() {
     <section class="card level-card">
       <div class="row spread">
         <div><p class="eyebrow">Votre progression</p><h2>Niveau ${esc(lvData.cefr)} · ${esc(lvData.name)}</h2></div>
-        <span class="badge">${lv.levels[lv.current].done} / ${Math.ceil(lvData.units.length * 0.8)} compétences</span>
+        <span class="badge">${lv.levels[lv.current].done} / ${levelThreshold(lvData.units.length)} compétences</span>
       </div>
       <div class="bar"><span style="width:${Math.min(100, Math.round(lv.ratio * 100))}%"></span></div>
+      ${state.profile?.sector ? `<p class="small muted profile-line">Parcours personnalisé · ${esc(findSector(state.profile.sector)?.name ?? '')} · <a href="#/reglages">modifier</a></p>` : `<p class="small muted profile-line"><a href="#/bienvenue">Indiquez votre métier</a> pour un vocabulaire sur mesure.</p>`}
       ${
         nextLevel
           ? `<div class="next-gift">${bao('happy', 64, { stage: Math.min(5, st + 1) })}<p class="small">Au niveau <strong>${esc(nextLevel.cefr)}</strong>, Bao recevra une nouvelle tenue et son jardin changera de ciel.</p></div>`
@@ -243,9 +250,10 @@ function renderPath() {
             <span class="badge ${info.complete ? 'ok' : ''}">${info.done} / ${info.total}</span>
           </header>
           ${l.units
-            .map((u) => {
+            .map((u, ui) => {
               const p = unitProgress(u, cards());
-              return `<a class="card unit" href="#/unite/${u.id}">
+              const head = ui === 0 || trackOf(l.units[ui - 1]) !== trackOf(u) ? `<p class="track-title track-${trackOf(u)}">${esc(TRACKS[trackOf(u)].name)}${trackOf(u) === 'metier' && state.profile?.sector ? ` · ${esc(findSector(state.profile.sector)?.name ?? '')}` : ''}</p>` : '';
+              return `${head}<a class="card unit track-${trackOf(u)}" href="#/unite/${u.id}">
                 <div class="row spread"><h3><span class="unit-num">${String(u.number).padStart(2, '0')}</span>${esc(u.title)}</h3>
                 ${!u.ready ? '<span class="badge">À préparer</span>' : p.canDo ? `<span class="badge ok">${icon('check', 14)} Validée</span>` : `<span class="badge">${p.known} / ${p.total}</span>`}</div>
                 <p>${esc(u.canDo)}</p>
@@ -276,7 +284,7 @@ function renderUnit(unitId) {
 
   app.innerHTML = `
     <p><a class="back" href="#/parcours">${icon('left', 14)} Parcours</a></p>
-    <p class="eyebrow">${esc(lvl.cefr)} · Unité ${u.number}</p>
+    <p class="eyebrow">${esc(lvl.cefr)} · ${esc(TRACKS[trackOf(u)].name)} · Unité ${u.number}</p>
     <h1>${esc(u.title)}</h1>
     <p class="row"><span class="badge ${p.canDo ? 'ok' : ''}">${p.canDo ? icon('check', 14) : ''} ${esc(u.canDo)}</span>${u.source === 'ai' ? '<span class="badge">Préparée par l’IA</span>' : ''}</p>
     <div class="stack actions" style="margin-bottom:18px">
@@ -356,9 +364,10 @@ async function generate(u) {
   box.innerHTML = `${bao('write', 150)}<h2>Bao écrit votre leçon…</h2><p class="muted">Il choisit les phrases, vérifie la grammaire et prépare le dialogue.</p><p class="typing"><span></span><span></span><span></span></p>`;
   const lang = { id: course().id, name: course().name, native: course().native };
   try {
-    const unit = await requestUnit({ language: lang, unitId: u.id });
+    const sector = u.track === 'metier' ? state.profile?.sector ?? null : null;
+    const unit = await requestUnit({ language: lang, unitId: u.id, sector: sector ?? (u.track === 'metier' ? 'general' : null) });
     state.generated[lang.id] ??= {};
-    state.generated[lang.id][u.id] = unit;
+    state.generated[lang.id][u.contentKey] = unit;
     if (unit.speechLang && !state.generated[lang.id].__meta) state.generated[lang.id].__meta = { speechLang: unit.speechLang };
     invalidateCourse();
     persist();
@@ -429,6 +438,12 @@ function renderSettings() {
     <h1>Réglages</h1>
     <form class="card" id="settings">
       <div class="field"><span>Langue apprise</span><a class="btn" href="#/langues">${icon('globe')} ${esc(course().name)} — changer</a></div>
+      <label class="field"><span>Mon secteur professionnel</span>
+        <select name="sector"><option value="">Non précisé</option>${SECTORS.map((x) => `<option value="${x.id}" ${state.profile?.sector === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+      </label>
+      <label class="field"><span>Mon objectif</span>
+        <select name="goal">${GOALS.map((x) => `<option value="${x.id}" ${state.profile?.goal === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+      </label>
       <label class="field"><span>Nouveaux éléments par session</span>
         <input type="number" name="newPerSession" min="1" max="10" value="${s.newPerSession}" />
       </label>
@@ -455,7 +470,10 @@ function renderSettings() {
 
   $('#settings').addEventListener('change', (e) => {
     const el = e.target;
-    if (el.type === 'checkbox') s[el.name] = el.checked;
+    if (el.name === 'sector' || el.name === 'goal') {
+      state.profile = { ...(state.profile ?? {}), [el.name]: el.value || null };
+      invalidateCourse();
+    } else if (el.type === 'checkbox') s[el.name] = el.checked;
     else if (el.type === 'number') s[el.name] = Math.min(Number(el.max), Math.max(Number(el.min), Number(el.value) || 1));
     persist();
     toast('Réglage enregistré.');
@@ -528,7 +546,13 @@ document.addEventListener('click', (e) => {
     router();
   }
 });
+
+// Ouverture : l'application se prépare derrière l'animation de Bao, puis
+// un nouvel apprenant est accueilli par le questionnaire de bienvenue.
+if (!state.profile && !location.hash.startsWith('#/bienvenue')) location.replace('#/bienvenue');
 router();
+load3D();
+playSplash({ stage: stage(), equipped: state.rewards.equipped });
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.register('sw.js').catch(() => {});

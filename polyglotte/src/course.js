@@ -5,7 +5,11 @@ import { LEVELS } from './curriculum.js';
 import { CURATED } from './data/index.js';
 import { findLanguage, specialChars } from './languages.js';
 
-export function buildCourse(langId, { generated = {}, customLanguages = [] } = {}) {
+// Les unités « Mon métier » dépendent du secteur de l'apprenant : leur contenu
+// est rangé sous la clé « unité@secteur ».
+export const contentKey = (unit, sector) => (unit.track === 'metier' ? `${unit.id}@${sector || 'general'}` : unit.id);
+
+export function buildCourse(langId, { generated = {}, customLanguages = [], sector = null } = {}) {
   const lang = findLanguage(langId, customLanguages);
   if (!lang) return null;
   const curated = CURATED[lang.id]?.units ?? [];
@@ -15,12 +19,15 @@ export function buildCourse(langId, { generated = {}, customLanguages = [] } = {
     ...level,
     index: li,
     units: level.units.map((u, ui) => {
-      const hand = curated.find((c) => c.id === u.id);
-      const content = hand ?? gen[u.id] ?? null;
+      const hand = u.track === 'metier' ? null : curated.find((c) => c.id === u.id);
+      const key = contentKey(u, sector);
+      const content = hand ?? gen[key] ?? null;
       return {
         ...u,
         levelId: level.id,
         levelIndex: li,
+        track: u.track ?? 'daily',
+        contentKey: key,
         number: li * level.units.length + ui + 1,
         ready: !!content,
         source: hand ? 'curated' : content ? 'ai' : null,

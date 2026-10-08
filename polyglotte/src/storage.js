@@ -21,6 +21,7 @@ export function defaultState() {
     extraAlts: {}, // { [courseId]: { [itemId]: [réponses acceptées par l'utilisateur] } }
     generated: {}, // { [courseId]: { [unitId]: unité générée par l'IA } }
     customLanguages: [], // langues ajoutées par leur nom
+    profile: null, // { sector, goal } : choisi à l'accueil, personnalise les leçons et Bao
     rewards: defaultRewards(),
     log: { days: {} },
   };
@@ -38,6 +39,7 @@ export function mergeState(raw) {
     extraAlts: raw.extraAlts ?? {},
     generated: raw.generated ?? {},
     customLanguages: Array.isArray(raw.customLanguages) ? raw.customLanguages : [],
+    profile: raw.profile && typeof raw.profile === 'object' ? raw.profile : null,
     rewards: {
       ...base.rewards,
       ...(raw.rewards ?? {}),

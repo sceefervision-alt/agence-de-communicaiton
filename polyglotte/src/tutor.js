@@ -41,13 +41,13 @@ export function validateTutorReply(raw) {
   };
 }
 
-export async function requestTutor({ language, levelId, unitId, history, endpoint = TUTOR_ENDPOINT, fetchImpl = globalThis.fetch }) {
+export async function requestTutor({ language, levelId, unitId, history, profile = null, endpoint = TUTOR_ENDPOINT, fetchImpl = globalThis.fetch }) {
   let res;
   try {
     res = await fetchImpl(endpoint, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ language: { id: language.id, name: language.name }, levelId, unitId, history: trimHistory(history) }),
+      body: JSON.stringify({ language: { id: language.id, name: language.name }, levelId, unitId, sector: profile?.sector ?? null, goal: profile?.goal ?? null, history: trimHistory(history) }),
     });
   } catch {
     throw new Error('Connexion impossible. Vérifiez votre accès à Internet.');

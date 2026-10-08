@@ -3,6 +3,8 @@
 // de réponse. Son expression change selon la conversation.
 
 import { requestTutor } from './tutor.js';
+import { setSlotMood } from './visual.js';
+import { celebrate } from './session-view.js';
 import { GeneratorUnavailable } from './generator.js';
 import { recognize, stopSpeaking } from './speech.js';
 import {
@@ -106,7 +108,7 @@ export function renderChat(unitParam) {
 
 function setBao(mood) {
   const el = $('#chat-bao');
-  if (el) el.innerHTML = bao(mood, 150);
+  if (el && !setSlotMood(el.querySelector('.bao3d'), mood)) el.innerHTML = bao(mood, 150, { live: true });
 }
 
 function renderLog() {
@@ -160,7 +162,7 @@ async function ask() {
   setBao('think');
   $('#chat-current').insertAdjacentHTML('beforeend', '<p class="typing" aria-label="Bao réfléchit"><span></span><span></span><span></span></p>');
   try {
-    const reply = await requestTutor({ language: currentLanguage(), levelId: session.levelId, unitId: session.unitId || undefined, history: session.history });
+    const reply = await requestTutor({ language: currentLanguage(), levelId: session.levelId, unitId: session.unitId || undefined, profile: state.profile, history: session.history });
     if (C !== session) return; // l'apprenant a quitté entre-temps
     const lastUser = [...session.history].reverse().find((m) => m.role === 'user');
     if (lastUser) {
@@ -249,4 +251,5 @@ function finish() {
       .map((m) => `<li><span><s class="muted" dir="auto">${esc(m.correction.original || m.text)}</s><br><strong dir="auto">${esc(m.correction.corrected)}</strong><br><span class="small muted">${esc(m.correction.explanation)}</span></span></li>`)
       .join('')}</ul></section>` : ''}
     <div class="stack"><a class="btn primary block" href="#/converser">Nouvelle conversation</a><a class="btn block" href="#/">Retour à l’accueil</a></div>`;
+  celebrate(result);
 }

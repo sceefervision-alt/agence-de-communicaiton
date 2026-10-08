@@ -21,7 +21,7 @@ function cleanList(list, max = 6) {
 }
 
 // Vérifie et normalise une unité ; lève une erreur si elle est inutilisable.
-export function validateUnit(raw, { langId, unitId }) {
+export function validateUnit(raw, { langId, unitId, sector = null }) {
   if (!raw || typeof raw !== 'object') throw new Error('Réponse vide.');
   if (raw.supported === false) throw new Error('Cette langue n’a pas été reconnue.');
 
@@ -40,7 +40,7 @@ export function validateUnit(raw, { langId, unitId }) {
     })
     .filter((it) => it.fr && it.target)
     .slice(0, 14)
-    .map((it, i) => ({ id: `${langId}-${unitId}-${i + 1}`, ...it, note: it.note || undefined }));
+    .map((it, i) => ({ id: `${langId}-${unitId}${sector ? `-${sector}` : ''}-${i + 1}`, ...it, note: it.note || undefined }));
   if (items.length < 6) throw new Error('Pas assez de phrases dans la leçon.');
 
   const dialogue = (Array.isArray(raw.dialogue) ? raw.dialogue : [])
@@ -70,13 +70,13 @@ export function validateUnit(raw, { langId, unitId }) {
   };
 }
 
-export async function requestUnit({ language, unitId, endpoint = DEFAULT_ENDPOINT, fetchImpl = globalThis.fetch }) {
+export async function requestUnit({ language, unitId, sector = null, endpoint = DEFAULT_ENDPOINT, fetchImpl = globalThis.fetch }) {
   let res;
   try {
     res = await fetchImpl(endpoint, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ language: { id: language.id, name: language.name, native: language.native }, unitId }),
+      body: JSON.stringify({ language: { id: language.id, name: language.name, native: language.native }, unitId, sector }),
     });
   } catch {
     throw new Error('Connexion impossible. Vérifiez votre accès à Internet.');
@@ -94,5 +94,5 @@ export async function requestUnit({ language, unitId, endpoint = DEFAULT_ENDPOIN
     throw new GeneratorUnavailable('La génération de leçons n’est pas encore configurée (clé d’API manquante).');
   }
   if (!res.ok) throw new Error(data?.message || 'La leçon n’a pas pu être préparée. Réessayez dans un instant.');
-  return validateUnit(data?.unit, { langId: language.id, unitId });
+  return validateUnit(data?.unit, { langId: language.id, unitId, sector });
 }
