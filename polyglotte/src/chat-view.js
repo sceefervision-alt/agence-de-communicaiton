@@ -1,11 +1,15 @@
 // Converser avec Bao, le professeur IA. L'apprenant parle (micro) ou écrit ;
 // Bao répond à voix haute, corrige avec bienveillance et propose des idées
 // de réponse. Son expression change selon la conversation.
+// Sans IA (version gratuite, hors ligne, ou serveur sans clé), Bao mène une
+// conversation guidée à partir des dialogues des leçons.
 
 import { requestTutor } from './tutor.js';
 import { setSlotMood } from './visual.js';
 import { celebrate } from './session-view.js';
 import { GeneratorUnavailable } from './generator.js';
+import { createScriptedTutor, canConverse } from './scripted-tutor.js';
+import { STATIC } from './env.js';
 import { recognize, stopSpeaking } from './speech.js';
 import { t, tn } from './i18n.js';
 import {
@@ -14,6 +18,21 @@ import {
 } from './app-state.js';
 
 let C = null;
+// Passe à vrai si le serveur répond que l'IA n'est pas disponible.
+let aiUnavailable = STATIC;
+
+// Situation de la conversation guidée : celle demandée si elle a un dialogue,
+// sinon une unité prête du niveau en cours (au hasard pour « libre »).
+function guidedUnit(unitId, levelIndex) {
+  const units = course().units;
+  const asked = units.find((u) => u.id === unitId);
+  if (canConverse(asked)) return asked;
+  const reachable = units.filter((u) => u.levelIndex <= levelIndex && canConverse(u));
+  const pool = reachable.length ? reachable : units.filter(canConverse);
+  if (!pool.length) return null;
+  if (!unitId) return pool[Math.floor(Math.random() * pool.length)];
+  return pool.filter((u) => u.levelIndex === levelIndex)[0] ?? pool[pool.length - 1];
+}
 
 export function endChat() {
   if (!C) return;
@@ -41,23 +60,33 @@ export function renderChat(unitParam) {
     unitId: unitParam === 'libre' ? '' : unitParam || nextUnit.id,
     before: snapshot(),
     done: false,
+    guided: null,
+    lastReply: null,
   };
+  if (aiUnavailable) {
+    const unit = guidedUnit(C.unitId, lv.current);
+    if (!unit) return renderNoGuided();
+    C.unitId = unit.id;
+    C.guided = createScriptedTutor({ unit, lang: course().id });
+  }
+  const scenarios = (l) => (C.guided ? l.units.filter(canConverse) : l.units);
 
   const canTalk = caps().speech;
   app.innerHTML = `
     <section class="chat">
       <div class="row spread chat-top">
-        <div><p class="eyebrow">${t('Professeur IA')} · ${esc(levelData.cefr)} ${esc(t(levelData.name))}</p><h1>${t('Converser avec Bao')}</h1></div>
+        <div><p class="eyebrow">${t(C.guided ? 'Conversation guidée' : 'Professeur IA')} · ${esc(levelData.cefr)} ${esc(t(levelData.name))}</p><h1>${t('Converser avec Bao')}</h1></div>
         <button class="btn" id="end-chat">${t('Terminer')}</button>
       </div>
       <div class="row chat-options">
         <label class="field inline"><span>${t('Situation')}</span>
           <select id="scenario">
-            <option value="">${t('Conversation libre')}</option>
+            <option value="">${t(C.guided ? 'Situation au hasard' : 'Conversation libre')}</option>
             ${course()
               .levels.slice(0, lv.current + 1)
               .reverse()
-              .map((l) => `<optgroup label="${esc(l.cefr)} · ${esc(t(l.name))}">${l.units.map((u) => `<option value="${u.id}" ${u.id === C.unitId ? 'selected' : ''}>${esc(t(u.title))}</option>`).join('')}</optgroup>`)
+              .filter((l) => scenarios(l).length)
+              .map((l) => `<optgroup label="${esc(l.cefr)} · ${esc(t(l.name))}">${scenarios(l).map((u) => `<option value="${u.id}" ${u.id === C.unitId ? 'selected' : ''}>${esc(t(u.title))}</option>`).join('')}</optgroup>`)
               .join('')}
           </select>
         </label>
@@ -78,6 +107,7 @@ export function renderChat(unitParam) {
         <input id="chat-text" class="answer-input" type="text" dir="auto" autocomplete="off" lang="${esc(course().speechLang)}" placeholder="${esc(t(canTalk ? 'Parlez, ou écrivez ici…' : 'Écrivez votre réponse…'))}" aria-label="${esc(t('Votre message'))}" maxlength="500" />
         <button type="submit" class="btn" aria-label="${esc(t('Envoyer'))}">${icon('send')}</button>
       </form>
+      ${C.guided ? `<p class="muted small center">${t('Sans IA, Bao suit le dialogue de la leçon : répondez librement, il vous comprend si l’essentiel y est.')}</p>` : ''}
       ${canTalk ? '' : `<p class="muted small center">${t(course().speechLang ? 'La reconnaissance vocale n’est pas disponible dans ce navigateur (essayez Chrome ou Edge) : la conversation se fait à l’écrit.' : 'La voix n’est pas disponible pour cette langue : la conversation se fait à l’écrit.')}</p>`}
     </section>`;
 
@@ -107,6 +137,13 @@ export function renderChat(unitParam) {
   ask();
 }
 
+function renderNoGuided() {
+  C = null;
+  app.innerHTML = `<section class="card center">${bao('think', 140)}<h1>${t('Converser avec Bao')}</h1>
+    <p class="muted">${t('Pour converser sans IA, Bao a besoin d’une leçon prête dans cette langue. Commencez par le parcours : la conversation s’ouvrira avec les dialogues des leçons.')}</p>
+    <a class="btn primary" href="#/parcours">${t('Voir le parcours')}</a></section>`;
+}
+
 function setBao(mood) {
   const el = $('#chat-bao');
   if (el && !setSlotMood(el.querySelector('.bao3d'), mood)) el.innerHTML = bao(mood, 150, { live: true });
@@ -116,7 +153,7 @@ function renderLog() {
   const log = $('#chat-log');
   if (!log) return;
   // La dernière réplique de Bao est affichée en grand au-dessus.
-  const past = C.history.slice(0, -1);
+  const past = C.history.at(-1)?.role === 'assistant' ? C.history.slice(0, -1) : C.history;
   log.innerHTML = past
     .map((m) =>
       m.role === 'assistant'
@@ -138,9 +175,13 @@ function renderCurrent(reply) {
   el.classList.toggle('hide-tr', !C.showTr);
   el.innerHTML = `
     <div class="speech big">
-      <div class="row">${targetText(reply.reply, reply.translit)}${caps().audio ? `<button class="btn ghost audio-btn" id="replay" aria-label="${esc(t('Réécouter'))}">${icon('speaker')}</button>` : ''}</div>
-      <span class="tr">${esc(reply.translation)}</span>
-    </div>`;
+      ${reply.reply ? `<div class="row">${targetText(reply.reply, reply.translit)}${caps().audio ? `<button class="btn ghost audio-btn" id="replay" aria-label="${esc(t('Réécouter'))}">${icon('speaker')}</button>` : ''}</div>
+      <span class="tr">${esc(reply.translation)}</span>` : ''}
+      ${reply.note ? `<p class="chat-note">${esc(reply.note)}</p>` : ''}
+    </div>
+    ${reply.done ? `<div class="row actions"><a class="btn primary" href="#/converser">${t('Nouvelle conversation')}</a><button class="btn" id="end-now">${t('Terminer')}</button></div>` : ''}`;
+  $('#end-now')?.addEventListener('click', finish);
+  $('#chat-form').hidden = !!reply.done;
   $('#replay')?.addEventListener('click', () => say(reply.reply));
   $('#suggestions').innerHTML = reply.suggestions.length
     ? `<span class="muted small">${t('Idées de réponse :')}</span>${reply.suggestions
@@ -163,25 +204,40 @@ async function ask() {
   setBao('think');
   $('#chat-current').insertAdjacentHTML('beforeend', `<p class="typing" aria-label="${esc(t('Bao réfléchit'))}"><span></span><span></span><span></span></p>`);
   try {
-    const reply = await requestTutor({ language: currentLanguage(), base: base(), levelId: session.levelId, unitId: session.unitId || undefined, profile: state.profile, history: session.history });
+    const last = session.history.at(-1);
+    const reply = session.guided
+      ? last?.role === 'user'
+        ? session.guided.respond(last.text)
+        : session.guided.start()
+      : await requestTutor({ language: currentLanguage(), base: base(), levelId: session.levelId, unitId: session.unitId || undefined, profile: state.profile, history: session.history });
     if (C !== session) return; // l'apprenant a quitté entre-temps
     const lastUser = [...session.history].reverse().find((m) => m.role === 'user');
-    if (lastUser) {
+    if (lastUser && !lastUser.checked) {
       lastUser.correction = reply.correction;
-      lastUser.checked = true;
+      lastUser.checked = !session.guided || reply.accepted !== false;
     }
-    session.history.push({ role: 'assistant', text: reply.reply, translit: reply.translit, translation: reply.translation });
+    // Sans nouvelle réplique (essayez encore), Bao garde sa dernière phrase.
+    if (reply.reply) {
+      session.history.push({ role: 'assistant', text: reply.reply, translit: reply.translit, translation: reply.translation });
+      session.lastReply = reply;
+    }
     session.busy = false;
     setBao(reply.mood);
     renderLog();
-    renderCurrent(reply);
-    await say(reply.reply);
+    renderCurrent(reply.reply || !session.lastReply ? reply : { ...session.lastReply, note: reply.note, suggestions: reply.suggestions, done: reply.done });
+    if (reply.reply) await say(reply.reply);
     if (C === session && session.handsFree && caps().speech) listen();
     else $('#chat-text')?.focus();
   } catch (err) {
     if (C !== session) return;
     session.busy = false;
     setBao('comfort');
+    if (err instanceof GeneratorUnavailable && !aiUnavailable) {
+      // Pas d'IA sur ce serveur : on bascule sur la conversation guidée.
+      aiUnavailable = true;
+      C = null;
+      return renderChat(session.unitId);
+    }
     if (err instanceof GeneratorUnavailable) {
       $('#chat-current').innerHTML = `<div class="speech"><strong>${esc(err.message)}</strong><p class="small muted">${t('Pour l’activer, la personne qui héberge Polyglotte doit définir la variable ANTHROPIC_API_KEY puis lancer <code>npm start</code>.')} ${t('En attendant, les leçons et le jeu de rôle restent disponibles.')}</p></div>`;
       $('#chat-form').hidden = true;

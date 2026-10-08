@@ -631,6 +631,17 @@ export default {
   'Lune et étoiles': 'Moon and stars',
   'Cet aperçu fonctionne sans serveur : l’IA n’y est pas branchée.': 'This preview runs without a server: the AI isn’t connected here.',
 
+  // Conversation guidée (sans IA)
+  'Conversation guidée': 'Guided conversation',
+  'Situation au hasard': 'Random situation',
+  'Sans IA, Bao suit le dialogue de la leçon : répondez librement, il vous comprend si l’essentiel y est.': 'Without AI, Bao follows the lesson’s dialogue: answer freely, he understands you as long as the key words are there.',
+  'Pour converser sans IA, Bao a besoin d’une leçon prête dans cette langue. Commencez par le parcours : la conversation s’ouvrira avec les dialogues des leçons.': 'To talk without AI, Bao needs a lesson that is ready in this language. Start with the path: conversation opens up with the lessons’ dialogues.',
+  'À vous de commencer la conversation.': 'You start the conversation.',
+  'Conversation terminée : bravo, vous avez mené le dialogue jusqu’au bout !': 'Conversation complete: well done, you saw the dialogue through to the end!',
+  'Pas tout à fait. Essayez encore, par exemple avec l’une de ces idées.': 'Not quite. Try again, for example with one of these ideas.',
+  'Compris ! Voici la tournure la plus naturelle.': 'Got it! Here’s the most natural way to say it.',
+  'Voici ce qu’on pouvait répondre. On continue !': 'Here’s what you could have said. Let’s keep going!',
+
   // Navigation
   'Navigation principale': 'Main navigation',
   'Accueil': 'Home',
