@@ -5,6 +5,7 @@
 // l'interface s'affiche en anglais.
 
 import EN from './i18n/en.js';
+import { STATIC } from './env.js';
 
 export const CATALOG = Object.keys(EN);
 
@@ -122,6 +123,7 @@ export function cachedTable(lang, storage = globalThis.localStorage) {
 }
 
 export async function fetchTable(lang, { endpoint = 'api/ui', fetchImpl = globalThis.fetch, storage = globalThis.localStorage } = {}) {
+  if (STATIC) return null;
   try {
     const res = await fetchImpl(`${endpoint}/${encodeURIComponent(lang)}?v=${CATALOG_VERSION}`);
     if (!res.ok) return null;

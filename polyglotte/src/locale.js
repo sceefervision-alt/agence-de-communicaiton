@@ -11,6 +11,7 @@
 // toujours changer ce choix.
 
 import { LANGUAGES } from './languages.js';
+import { STATIC } from './env.js';
 
 // Langues de chaque pays, la langue par défaut en premier. Seules figurent les
 // langues proposées par Polyglotte (la langue écrite et scolaire du pays).
@@ -142,6 +143,7 @@ export function browserLocale() {
 
 // Pays de connexion fourni par le serveur (si l'hébergeur le transmet).
 export async function fetchGeoCountry({ endpoint = 'api/geo', fetchImpl = globalThis.fetch, timeoutMs = 1500 } = {}) {
+  if (STATIC) return null;
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeoutMs);

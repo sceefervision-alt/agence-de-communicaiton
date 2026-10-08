@@ -620,6 +620,17 @@ export default {
   'Écrire 8 réponses justes': 'Write 8 correct answers',
   'Échanger 3 répliques avec Bao, le professeur IA': 'Exchange 3 lines with Bao, the AI teacher',
 
+  // Ciel de l'en-tête
+  'Bonjour': 'Good morning',
+  'Bon après-midi': 'Good afternoon',
+  'Bonsoir': 'Good evening',
+  'Bonne nuit': 'Good night',
+  'Soleil du matin': 'Morning sun',
+  'Soleil de midi': 'Midday sun',
+  'Soleil du soir': 'Evening sun',
+  'Lune et étoiles': 'Moon and stars',
+  'Cet aperçu fonctionne sans serveur : l’IA n’y est pas branchée.': 'This preview runs without a server: the AI isn’t connected here.',
+
   // Navigation
   'Navigation principale': 'Main navigation',
   'Accueil': 'Home',

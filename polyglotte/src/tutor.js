@@ -3,6 +3,7 @@
 
 import { GeneratorUnavailable } from './generator.js';
 import { t } from './i18n.js';
+import { STATIC } from './env.js';
 
 export const TUTOR_ENDPOINT = 'api/tutor';
 export const MAX_TURNS = 20; // historique envoyé au serveur
@@ -43,6 +44,7 @@ export function validateTutorReply(raw) {
 }
 
 export async function requestTutor({ language, base = 'fr', levelId, unitId, history, profile = null, endpoint = TUTOR_ENDPOINT, fetchImpl = globalThis.fetch }) {
+  if (STATIC) throw new GeneratorUnavailable(t('Cet aperçu fonctionne sans serveur : l’IA n’y est pas branchée.'));
   let res;
   try {
     res = await fetchImpl(endpoint, {

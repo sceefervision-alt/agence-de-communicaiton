@@ -16,6 +16,8 @@ import { renderBao, gardenScene } from './bao-view.js';
 import { renderWelcome } from './onboarding.js';
 import { playSplash } from './splash.js';
 import { load3D } from './visual.js';
+import { startSky, renderSky } from './sky.js';
+import { STATIC } from './env.js';
 import { SECTORS, GOALS, TRACKS, trackOf, levelThreshold, findSector } from './curriculum.js';
 
 // ---------- Routeur ----------
@@ -42,6 +44,7 @@ function router() {
   if (!hash.startsWith('#/bienvenue')) document.body.classList.remove('onboarding');
   document.body.dataset.level = String(stage());
   updateBambooCounter();
+  renderSky();
   for (const [re, fn] of routes) {
     const m = hash.match(re);
     if (m) {
@@ -240,41 +243,60 @@ function chooseLanguage(id) {
 
 // ---------- Parcours ----------
 
+// Le parcours serpente comme un sentier : chaque compétence est une étape
+// ronde, décalée à gauche puis à droite. Bao se tient au bord du chemin.
+const NODE_OFFSETS = [0, 52, 84, 52, 0, -52, -84, -52];
+const TRACK_ICON = { daily: 'star', pro: 'briefcase', metier: 'tool' };
+
+function pathNode(u, ui, nextId) {
+  const p = unitProgress(u, cards());
+  const track = trackOf(u);
+  const isNext = u.id === nextId;
+  const state = p.canDo ? 'done' : isNext ? 'next' : u.ready && p.known > 0 ? 'started' : 'todo';
+  const status = !u.ready ? t('À préparer') : p.canDo ? t('Validée') : `${p.known} / ${p.total}`;
+  const face = state === 'done' ? icon('check', 30) : !u.ready ? icon('sparkle', 28) : icon(TRACK_ICON[track], 28);
+  return `<li class="path-step" style="--x:${NODE_OFFSETS[ui % NODE_OFFSETS.length]}px">
+    <a class="node node-${state} track-${track}" href="#/unite/${u.id}" style="--p:${Math.round(p.ratio * 100)}" aria-label="${esc(`${t('Unité {n}', { n: u.number })} : ${t(u.title)} — ${status}`)}">
+      <span class="node-face">${face}</span>
+      ${isNext ? `<span class="node-tip">${t(p.known ? 'Continuer' : 'Commencer')}</span>` : ''}
+    </a>
+    <span class="node-label">${esc(t(u.title))}</span>
+  </li>`;
+}
+
 function renderPath() {
   const c = course();
   const lv = level();
   const perso = custom();
+  const current = c.levels[lv.current];
+  const next = current.units.find((u) => !unitProgress(u, cards()).canDo) ?? current.units[0];
   app.innerHTML = `
     <p class="eyebrow">${esc(courseName())}</p><h1>${t('Parcours')}</h1>
     <p class="muted">${t('Du niveau débutant (A1) au niveau senior (C2). Toutes les unités sont ouvertes : commencez par ce qui vous sert, et validez en une minute ce que vous savez déjà.')}</p>
+    <ul class="legend">${Object.keys(TRACKS)
+      .map((k) => `<li class="track-${k}"><span class="dot">${icon(TRACK_ICON[k], 14)}</span>${esc(t(TRACKS[k].name))}${k === 'metier' && state.profile?.sector ? ` · ${esc(t(findSector(state.profile.sector)?.name ?? ''))}` : ''}</li>`)
+      .join('')}</ul>
     ${c.levels
       .map((l, li) => {
         const info = lv.levels[li];
         const cls = info.complete ? 'complete' : li === lv.current ? 'current' : li > lv.current ? 'later' : '';
+        const status = info.complete ? t('terminé') : li === lv.current ? t('en cours') : '';
         return `<section class="level-section ${cls}">
-          <header class="level-head">
-            <div class="level-bao">${bao(info.complete ? 'proud' : li === lv.current ? 'hello' : 'sleep', 72, { stage: li })}</div>
-            <div class="grow"><p class="eyebrow">${esc(l.cefr)}${info.complete ? ` · ${t('terminé')}` : li === lv.current ? ` · ${t('en cours')}` : ''}</p><h2>${esc(t(l.name))}</h2><p class="muted small">${esc(t(l.tagline))}</p></div>
-            <span class="badge ${info.complete ? 'ok' : ''}">${info.done} / ${info.total}</span>
+          <header class="level-banner level-${li}">
+            <div class="grow"><p class="eyebrow">${esc(l.cefr)}${status ? ` · ${status}` : ''}</p><h2>${esc(t(l.name))}</h2><p>${esc(t(l.tagline))}</p></div>
+            <span class="level-count">${info.done} / ${info.total}</span>
           </header>
-          ${l.units
-            .map((u, ui) => {
-              const p = unitProgress(u, cards());
-              const head = ui === 0 || trackOf(l.units[ui - 1]) !== trackOf(u) ? `<p class="track-title track-${trackOf(u)}">${esc(t(TRACKS[trackOf(u)].name))}${trackOf(u) === 'metier' && state.profile?.sector ? ` · ${esc(t(findSector(state.profile.sector)?.name ?? ''))}` : ''}</p>` : '';
-              return `${head}<a class="card unit track-${trackOf(u)}" href="#/unite/${u.id}">
-                <div class="row spread"><h3><span class="unit-num">${String(u.number).padStart(2, '0')}</span>${esc(t(u.title))}</h3>
-                ${!u.ready ? `<span class="badge">${t('À préparer')}</span>` : p.canDo ? `<span class="badge ok">${icon('check', 14)} ${t('Validée')}</span>` : `<span class="badge">${p.known} / ${p.total}</span>`}</div>
-                <p>${esc(t(u.canDo))}</p>
-                ${u.ready ? `<div class="bar" aria-hidden="true"><span style="width:${Math.round(p.ratio * 100)}%"></span></div>` : ''}
-              </a>`;
-            })
-            .join('')}
+          <div class="path">
+            <div class="path-bao ${li % 2 ? 'left' : 'right'}">${bao(info.complete ? 'proud' : li === lv.current ? 'hello' : 'sleep', 110, { stage: li, live: false })}</div>
+            <ol class="path-nodes">${l.units.map((u, ui) => pathNode(u, ui, li === lv.current ? next.id : null)).join('')}</ol>
+          </div>
         </section>`;
       })
       .join('')}
-    <a class="card unit" href="#/vocabulaire">
-      <div class="row spread"><h3>${t('Mon vocabulaire')}</h3><span class="badge">${tn(perso.length, '{n} mot', '{n} mots')}</span></div>
-      <p>${t('Vos propres mots, intégrés à la répétition espacée.')}</p>
+    <a class="card unit vocab-card" href="#/vocabulaire">
+      <span class="vocab-icon">${icon('book', 26)}</span>
+      <div class="grow"><div class="row spread"><h3>${t('Mon vocabulaire')}</h3><span class="badge">${tn(perso.length, '{n} mot', '{n} mots')}</span></div>
+      <p>${t('Vos propres mots, intégrés à la répétition espacée.')}</p></div>
     </a>`;
 }
 
@@ -583,11 +605,12 @@ document.addEventListener('click', (e) => {
 // prépare derrière l'animation de Bao, puis un nouvel apprenant est accueilli
 // par le questionnaire de bienvenue.
 initLocale({ onChange: router });
+startSky();
 if (!state.profile && !location.hash.startsWith('#/bienvenue')) location.replace('#/bienvenue');
 router();
 load3D();
 playSplash({ stage: stage(), equipped: state.rewards.equipped });
 
-if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+if ('serviceWorker' in navigator && location.protocol !== 'file:' && !STATIC) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }

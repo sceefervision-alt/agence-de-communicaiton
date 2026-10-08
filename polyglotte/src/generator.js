@@ -7,6 +7,7 @@
 // le modèle les renvoie dans le champ `base`, rangé ensuite dans `fr`.
 
 import { t } from './i18n.js';
+import { STATIC } from './env.js';
 
 export const DEFAULT_ENDPOINT = 'api/generate-unit';
 
@@ -75,6 +76,7 @@ export function validateUnit(raw, { langId, unitId, sector = null, base = 'fr' }
 }
 
 export async function requestUnit({ language, unitId, sector = null, base = 'fr', endpoint = DEFAULT_ENDPOINT, fetchImpl = globalThis.fetch }) {
+  if (STATIC) throw new GeneratorUnavailable(t('Cet aperçu fonctionne sans serveur : l’IA n’y est pas branchée.'));
   let res;
   try {
     res = await fetchImpl(endpoint, {

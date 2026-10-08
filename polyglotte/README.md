@@ -49,7 +49,11 @@ Une application web pour apprendre **n'importe quelle langue**, du niveau **déb
 
 ## Identité visuelle
 
-Bleu nuit et blanc, dans l'esprit de Sceefer Vision : titres en serif (Cormorant Garamond), texte en Inter, filets fins, icônes au trait, carte d'accueil en dégradé bleu nuit. Les couleurs sont définies une seule fois dans `styles.css` (variables `--primary`, `--primary-deep`, `--accent`…) : il suffit d'y reporter les codes exacts de la charte. Un mode sombre bleu nuit s'active automatiquement selon le réglage de l'appareil.
+Un bleu franc partout et du blanc, dans l'esprit des applications d'apprentissage ludiques : police ronde et grasse (Nunito), boutons en relief qui s'enfoncent quand on les touche, cartes aux bords épais, parcours en zigzag d'étapes rondes, onglets en bas sur téléphone et menu latéral sur ordinateur. L'icône est la tête de Bao sur fond bleu.
+
+**Le ciel de l'en-tête suit l'heure** (`src/sky.js`) : soleil du matin bas sur un ciel pêche (6 h-11 h), soleil de midi au zénith (11 h-17 h), soleil du soir orangé qui se couche (17 h-21 h), puis lune et étoiles. L'astre avance sur son arc toutes les minutes, avec des nuages qui flottent et un salut adapté (« Bonjour », « Bonsoir »…).
+
+Les couleurs sont définies une seule fois dans `styles.css` (`--blue`, `--blue-deep`, `--navy`…), avec un mode sombre bleu nuit.
 
 ## Lancer l'application
 
