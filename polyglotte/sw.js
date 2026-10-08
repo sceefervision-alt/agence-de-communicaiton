@@ -1,5 +1,5 @@
 // Service worker : l'application fonctionne entièrement hors ligne.
-const CACHE = 'polyglotte-v1';
+const CACHE = 'polyglotte-v2';
 const FILES = [
   './',
   'index.html',

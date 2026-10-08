@@ -27,6 +27,25 @@ const say = (text, rate) => state.settings.audio && speak(text, course().speechL
 const langName = () => course().name.toLowerCase();
 const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 
+// Icônes au trait (SVG inline, couleur héritée du texte).
+const ICONS = {
+  speaker: '<path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+  play: '<path d="M7 5v14l11-7z"/>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+  close: '<path d="M6 6l12 12M18 6 6 18"/>',
+  check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  dialogue: '<path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M17 9h3a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1v3l-4-3h-4"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  download: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
+  upload: '<path d="M12 20V9M7 14l5-5 5 5M5 4h14"/>',
+  left: '<path d="M15 6l-6 6 6 6"/>',
+  right: '<path d="M9 6l6 6-6 6"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M19 19v2H6"/>',
+};
+const icon = (name, size = 18) =>
+  `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+const mono = (c) => `<span class="mono" aria-hidden="true">${esc(c.id.toUpperCase())}</span>`;
+
 function toast(msg) {
   const el = document.createElement('div');
   el.className = 'toast';
@@ -38,7 +57,7 @@ function toast(msg) {
 
 function audioBtn(text, label = 'Écouter') {
   if (!caps().audio) return '';
-  return `<button class="btn ghost audio-btn" data-say="${esc(text)}" aria-label="${esc(label)}" title="${esc(label)}">🔊</button>`;
+  return `<button class="btn ghost audio-btn" data-say="${esc(text)}" aria-label="${esc(label)}" title="${esc(label)}">${icon('speaker')}</button>`;
 }
 
 function bindAudio(root = app) {
@@ -110,11 +129,11 @@ function renderHome() {
   })];
 
   app.innerHTML = `
-    <section class="card">
+    <section class="card hero">
       <div class="row spread">
-        <h1>${c.flag} ${esc(c.name)}</h1>
+        <div><p class="eyebrow">Votre langue</p><h1>${esc(c.name)}</h1></div>
         <div class="lang-switch" role="group" aria-label="Langue apprise">
-          ${Object.values(COURSES).map((k) => `<button class="btn" data-course="${k.id}" aria-pressed="${k.id === c.id}">${k.flag} ${esc(k.name)}</button>`).join('')}
+          ${Object.values(COURSES).map((k) => `<button class="btn" data-course="${k.id}" aria-pressed="${k.id === c.id}">${mono(k)} ${esc(k.name)}</button>`).join('')}
         </div>
       </div>
       <p class="muted">Apprendre en produisant, réviser au bon moment, comprendre ses erreurs. Sans vies, sans pression.</p>
@@ -138,11 +157,11 @@ function renderHome() {
       <h2>Révisions à venir</h2>
       <p class="muted small">La répétition espacée vous montre ce qui arrive : pas de surprise, pas de pile cachée.</p>
       <div class="forecast" aria-label="Prévision des révisions sur 7 jours">
-        ${stats.forecast.map((n, i) => `<div><span style="height:${Math.round((n / maxF) * 46)}px"></span>${n}<br>${esc(dayNames[i])}</div>`).join('')}
+        ${stats.forecast.map((n, i) => `<div><span style="height:${Math.round((n / maxF) * 54)}px"></span>${n}<br>${esc(dayNames[i])}</div>`).join('')}
       </div>
     </section>
 
-    <p><a href="#/pourquoi">Pourquoi Polyglotte est différent de Duolingo →</a></p>
+    <p><a href="#/pourquoi">Pourquoi Polyglotte est différent de Duolingo ${icon('right', 14)}</a></p>
   `;
   $$('[data-course]').forEach((b) =>
     b.addEventListener('click', () => {
@@ -159,21 +178,21 @@ function renderPath() {
   const c = course();
   const perso = custom();
   app.innerHTML = `
-    <h1>Parcours ${c.flag}</h1>
+    <p class="eyebrow">${esc(c.name)}</p><h1>Parcours</h1>
     <p class="muted">Toutes les unités sont ouvertes : commencez par ce qui vous sert. Vous connaissez déjà une unité ? Validez-la en une minute.</p>
     ${c.units
       .map((u, i) => {
         const p = unitProgress(u, cards());
         return `
         <a class="card unit" href="#/unite/${u.id}">
-          <div class="row spread"><h2>${i + 1}. ${esc(u.title)}</h2>${p.canDo ? '<span class="badge ok">✓ Validée</span>' : `<span class="badge">${p.known} / ${p.total}</span>`}</div>
+          <div class="row spread"><h2><span class="unit-num">${String(i + 1).padStart(2, '0')}</span>${esc(u.title)}</h2>${p.canDo ? `<span class="badge ok">${icon('check', 14)} Validée</span>` : `<span class="badge">${p.known} / ${p.total}</span>`}</div>
           <p>${esc(u.canDo)}</p>
           <div class="bar" aria-hidden="true"><span style="width:${Math.round(p.ratio * 100)}%"></span></div>
         </a>`;
       })
       .join('')}
     <a class="card unit" href="#/vocabulaire">
-      <div class="row spread"><h2>★ Mon vocabulaire</h2><span class="badge">${perso.length} mot${perso.length > 1 ? 's' : ''}</span></div>
+      <div class="row spread"><h2>Mon vocabulaire</h2><span class="badge">${perso.length} mot${perso.length > 1 ? 's' : ''}</span></div>
       <p>Vos propres mots, intégrés à la répétition espacée.</p>
     </a>
   `;
@@ -189,14 +208,14 @@ function renderUnit(unitId) {
   const levelLabel = (stage) => ['Nouveau', 'Découvert', 'Reconnu', 'Rappel', 'Production', 'Production'][stage] ?? 'Nouveau';
 
   app.innerHTML = `
-    <p><a href="#/parcours">← Parcours</a></p>
+    <p><a class="back" href="#/parcours">${icon('left', 14)} Parcours</a></p>
     <h1>${esc(u.title)}</h1>
-    <p class="row"><span class="badge ${p.canDo ? 'ok' : ''}">${p.canDo ? '✓' : '○'} ${esc(u.canDo)}</span></p>
-    <div class="stack" style="margin-bottom:16px">
+    <p class="row"><span class="badge ${p.canDo ? 'ok' : ''}">${p.canDo ? icon('check', 14) : ''} ${esc(u.canDo)}</span></p>
+    <div class="stack actions" style="margin-bottom:18px">
       <a class="btn primary block" href="#/session/apprendre/${u.id}">${fresh ? `Apprendre (${plural(fresh, 'nouvel élément', 'nouveaux éléments')})` : 'Retravailler cette unité'}</a>
       <div class="row">
-        <a class="btn" href="#/session/role/${u.id}">🎭 Jeu de rôle</a>
-        ${p.canDo ? '' : `<a class="btn" href="#/session/test/${u.id}">⚡ Je connais déjà</a>`}
+        <a class="btn" href="#/session/role/${u.id}">${icon('dialogue')} Jeu de rôle</a>
+        ${p.canDo ? '' : `<a class="btn" href="#/session/test/${u.id}">${icon('target')} Je connais déjà</a>`}
       </div>
     </div>
 
@@ -212,7 +231,7 @@ function renderUnit(unitId) {
           .map((l) => `<li class="${l.who}"><div class="bubble">${esc(l.target)} ${audioBtn(l.target)}<span class="tr">${esc(l.fr)}</span></div></li>`)
           .join('')}
       </ul>
-      ${caps().audio ? '<button class="btn" id="play-all">▶ Écouter tout le dialogue</button>' : ''}
+      ${caps().audio ? `<button class="btn" id="play-all">${icon('play', 16)} Écouter tout le dialogue</button>` : ''}
     </section>
 
     <section class="card">
@@ -289,7 +308,7 @@ function endSession() {
 function sessionHeader() {
   const pct = Math.round((S.index / S.queue.length) * 100);
   return `<div class="session-head">
-    <a class="btn ghost" href="#/" aria-label="Quitter la session">✕</a>
+    <a class="btn ghost" href="#/" aria-label="Quitter la session">${icon('close')}</a>
     <div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>
   </div>`;
 }
@@ -336,7 +355,7 @@ function renderExercise() {
       body = `<p class="prompt-label">Nouveau</p>
         <div class="row"><p class="target-big">${esc(it.target)}</p>${audioBtn(it.target)}</div>
         <p class="prompt">${esc(it.fr)}</p>
-        ${it.note ? `<div class="card grammar small">💡 ${esc(it.note)}</div>` : ''}
+        ${it.note ? `<div class="card grammar small"><span class="eyebrow">Note</span>${esc(it.note)}</div>` : ''}
         <button class="btn primary block" id="next">J’ai compris</button>`;
       break;
     case 'choice-target':
@@ -347,7 +366,7 @@ function renderExercise() {
       break;
     case 'listen-choice':
       body = `<p class="prompt-label">Écoutez et choisissez le sens</p>
-        <div class="row" style="margin:12px 0 20px"><button class="btn audio-big" data-say="${esc(it.target)}" aria-label="Écouter">🔊</button><button class="btn" id="slow">🐢 Plus lent</button></div>
+        <div class="row listen-row"><button class="btn audio-big" data-say="${esc(it.target)}" aria-label="Écouter">${icon('speaker', 32)}</button><button class="btn ghost" id="slow">Ralenti</button></div>
         ${optionsHtml(ex)}`;
       break;
     case 'write':
@@ -359,14 +378,14 @@ function renderExercise() {
       break;
     case 'dictation':
       body = `<p class="prompt-label">Écrivez ce que vous entendez</p>
-        <div class="row" style="margin:12px 0 20px"><button class="btn audio-big" data-say="${esc(it.target)}" aria-label="Écouter">🔊</button><button class="btn" id="slow">🐢 Plus lent</button></div>
+        <div class="row listen-row"><button class="btn audio-big" data-say="${esc(it.target)}" aria-label="Écouter">${icon('speaker', 32)}</button><button class="btn ghost" id="slow">Ralenti</button></div>
         ${answerInput()}`;
       break;
     case 'speak':
       body = `<p class="prompt-label">Dites à voix haute</p>
         <div class="row"><p class="target-big">${esc(it.target)}</p>${audioBtn(it.target)}</div>
         <p class="muted">${esc(it.fr)}</p>
-        <div class="stack"><button class="btn primary block" id="mic">🎤 Appuyez puis parlez</button>
+        <div class="stack"><button class="btn primary block" id="mic">${icon('mic')} Appuyez puis parlez</button>
         <button class="btn ghost block" id="no-mic">Je ne peux pas parler maintenant</button></div>`;
       break;
   }
@@ -415,7 +434,7 @@ function optionsHtml(ex) {
 function answerInput() {
   return `<input id="answer" class="answer-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" lang="${esc(course().speechLang)}" aria-label="Votre réponse" />
     ${charsBar()}
-    <div class="row" style="margin-top:12px"><button class="btn primary" id="check">Vérifier</button><button class="btn ghost" id="skip">Je ne sais pas</button></div>`;
+    <div class="row actions"><button class="btn primary" id="check">Vérifier</button><button class="btn ghost" id="skip">Je ne sais pas</button></div>`;
 }
 
 function contextHtml(ex) {
@@ -483,7 +502,7 @@ async function answerSpeak(ex) {
   if (S.phase !== 'question') return;
   const mic = $('#mic');
   mic.disabled = true;
-  mic.textContent = '🎙️ Je vous écoute…';
+  mic.textContent = 'Je vous écoute…';
   try {
     const heard = await recognize(course().speechLang);
     let best = null;
@@ -500,7 +519,7 @@ async function answerSpeak(ex) {
     showFeedback(ex, { ...best, message: `J’ai entendu : « ${best.heard} ». ${best.status === 'correct' ? 'Excellente prononciation !' : 'Presque, c’est compris.'}`, showTarget: false });
   } catch (err) {
     mic.disabled = false;
-    mic.textContent = '🎤 Appuyez puis parlez';
+    mic.innerHTML = `${icon('mic')} Appuyez puis parlez`;
     toast(err.message);
   }
 }
@@ -524,10 +543,10 @@ function showFeedback(ex, r) {
     <p>${esc(r.message)}</p>
     ${r.showTarget || r.status !== 'correct' ? `<p><strong>${esc(r.expected ?? it.target)}</strong> ${audioBtn(r.expected ?? it.target)}<br><span class="small">${esc(it.fr)}</span></p>` : ''}
     ${r.status === 'wrong' ? diffHtml(r.diff) : ''}
-    ${it.note && r.status !== 'correct' ? `<p class="note small">💡 ${esc(it.note)}</p>` : ''}
+    ${it.note && r.status !== 'correct' ? `<p class="note small"><span class="eyebrow">Note</span>${esc(it.note)}</p>` : ''}
     ${r.status === 'wrong' && S.mode !== 'test' && S.mode !== 'role' && !r.retrySpeak ? '<p class="small muted">Pas de souci : cet élément reviendra un peu plus loin.</p>' : ''}
-    <div class="row" style="margin-top:12px">
-      ${r.retrySpeak ? '<button class="btn" id="retry-speak">🎤 Réessayer</button>' : ''}
+    <div class="row actions">
+      ${r.retrySpeak ? `<button class="btn" id="retry-speak">${icon('mic')} Réessayer</button>` : ''}
       <button class="btn primary" id="continue">Continuer</button>
       ${canContest ? '<button class="btn ghost" id="contest">Ma réponse était correcte</button>' : ''}
     </div>`;
@@ -636,7 +655,7 @@ document.addEventListener('keydown', (e) => {
 function renderVocab() {
   const list = custom();
   app.innerHTML = `
-    <h1>Mon vocabulaire ${course().flag}</h1>
+    <p class="eyebrow">${esc(course().name)}</p><h1>Mon vocabulaire</h1>
     <p class="muted">Ajoutez les mots dont <em>vous</em> avez besoin (travail, voyage, loisirs). Ils suivent la même répétition espacée que le reste du cours.</p>
     <form class="card" id="vocab-form">
       <label class="field"><span>En français</span><input type="text" name="fr" required maxlength="120" placeholder="ex. un rendez-vous" /></label>
@@ -686,7 +705,7 @@ function renderSettings() {
     <h1>Réglages</h1>
     <form class="card" id="settings">
       <label class="field"><span>Langue apprise</span>
-        <select name="course">${Object.values(COURSES).map((c) => `<option value="${c.id}" ${c.id === s.course ? 'selected' : ''}>${c.flag} ${esc(c.name)}</option>`).join('')}</select>
+        <select name="course">${Object.values(COURSES).map((c) => `<option value="${c.id}" ${c.id === s.course ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
       </label>
       <label class="field"><span>Nouveaux éléments par session</span>
         <input type="number" name="newPerSession" min="1" max="10" value="${s.newPerSession}" />
@@ -706,8 +725,8 @@ function renderSettings() {
       <h2>Vos données</h2>
       <p class="muted small">Pas de compte, pas de serveur : votre progression reste sur cet appareil. Exportez-la pour la sauvegarder ou la transférer.</p>
       <div class="row">
-        <button class="btn" id="export">⬇ Exporter</button>
-        <label class="btn">⬆ Importer<input type="file" id="import" accept="application/json" hidden /></label>
+        <button class="btn" id="export">${icon('download')} Exporter</button>
+        <label class="btn">${icon('upload')} Importer<input type="file" id="import" accept="application/json" hidden /></label>
         <button class="btn ghost" id="reset">Réinitialiser ${esc(course().name.toLowerCase())}</button>
       </div>
     </section>`;

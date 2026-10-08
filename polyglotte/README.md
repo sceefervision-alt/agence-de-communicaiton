@@ -20,6 +20,10 @@ Une application web pour apprendre l'**espagnol** et l'**anglais** (pour les fra
 | XP et ligues | Mots maîtrisés et compétences « Je peux… » validées |
 | Compte obligatoire | Sans compte, hors ligne (PWA), progression exportable en JSON |
 
+## Identité visuelle
+
+Bleu nuit et blanc, dans l'esprit de Sceefer Vision : titres en serif (Cormorant Garamond), texte en Inter, filets fins, icônes au trait, carte d'accueil en dégradé bleu nuit. Les couleurs sont définies une seule fois dans `styles.css` (variables `--primary`, `--primary-deep`, `--accent`…) : il suffit d'y reporter les codes exacts de la charte. Un mode sombre bleu nuit s'active automatiquement selon le réglage de l'appareil.
+
 ## Lancer l'application
 
 Aucune dépendance et aucune étape de build : ce sont des modules ES natifs.

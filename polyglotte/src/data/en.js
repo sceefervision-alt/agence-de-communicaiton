@@ -4,7 +4,6 @@
 export default {
   id: 'en',
   name: 'Anglais',
-  flag: '🇬🇧',
   speechLang: 'en-GB',
   specialChars: [],
   units: [

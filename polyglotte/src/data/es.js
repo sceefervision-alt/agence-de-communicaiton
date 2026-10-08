@@ -4,7 +4,6 @@
 export default {
   id: 'es',
   name: 'Espagnol',
-  flag: '🇪🇸',
   speechLang: 'es-ES',
   specialChars: ['á', 'é', 'í', 'ó', 'ú', 'ñ', 'ü', '¿', '¡'],
   units: [
