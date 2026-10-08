@@ -5,9 +5,11 @@ import { weeklyStatus, courseStats, unitProgress, dateKey } from './progress.js'
 import { dailyChallenge } from './rewards.js';
 import { canSpeak, canRecognize, speak } from './speech.js';
 import {
-  state, app, persist, replaceState, invalidateCourse, esc, $, $$, toast, icon, bambooIcon, plural, course, cards, custom, items,
-  langName, caps, bao, baoSays, level, stage, audioBtn, bindAudio, targetText, weekWidget, updateBambooCounter,
+  state, app, persist, replaceState, invalidateCourse, esc, $, $$, toast, icon, bambooIcon, course, cards, custom, items,
+  langName, courseName, base, baseLanguage, caps, bao, baoSays, level, stage, audioBtn, bindAudio, targetText, weekWidget, updateBambooCounter,
 } from './app-state.js';
+import { t, tn, languageName, languageNameInline, uiLocale } from './i18n.js';
+import { initLocale, setBase, refreshUi, baseSelect } from './base-language.js';
 import { startSession, endSession, sessionActive } from './session-view.js';
 import { renderChat, endChat } from './chat-view.js';
 import { renderBao, gardenScene } from './bao-view.js';
@@ -83,17 +85,17 @@ function renderHome() {
 
   // Bao s'adresse à l'apprenant selon la situation (geste + phrase courte).
   let mood = 'hello';
-  let message = 'Prêt pour quelques minutes ensemble ?';
-  if (stats.seen === 0) message = `Bonjour ! Je suis Bao, votre professeur. On commence l’aventure en ${langName()} ?`;
+  let message = t('Prêt pour quelques minutes ensemble ?');
+  if (stats.seen === 0) message = t('Bonjour ! Je suis Bao, votre professeur. On commence l’aventure en {language} ?', { language: langName() });
   else if (stats.due > 0) {
     mood = 'read';
-    message = `J’ai préparé ${plural(stats.due, 'révision', 'révisions')} pour vous. Juste ce qu’il faut, au bon moment.`;
+    message = tn(stats.due, 'J’ai préparé {n} révision pour vous. Juste ce qu’il faut, au bon moment.', 'J’ai préparé {n} révisions pour vous. Juste ce qu’il faut, au bon moment.');
   } else if (week.reached) {
     mood = 'cheer';
-    message = 'Objectif de la semaine atteint ! Tout le reste, c’est du bonus.';
+    message = t('Objectif de la semaine atteint ! Tout le reste, c’est du bonus.');
   } else if (!nextUnit) {
     mood = 'proud';
-    message = 'Tout est à jour. On discute un peu ?';
+    message = t('Tout est à jour. On discute un peu ?');
   }
 
   // L'interface s'enrichit avec l'apprenant : certains blocs n'apparaissent
@@ -105,79 +107,79 @@ function renderHome() {
     <section class="card hero level-${st}">
       <div class="hero-grid">
         <div>
-          <p class="eyebrow">${esc(lvData.cefr)} · ${esc(lvData.name)}</p>
-          <h1>${esc(c.name)}</h1>
-          <a class="lang-link" href="#/langues">${icon('globe', 16)} Changer de langue</a>
+          <p class="eyebrow">${esc(lvData.cefr)} · ${esc(t(lvData.name))}</p>
+          <h1>${esc(courseName())}</h1>
+          <a class="lang-link" href="#/langues">${icon('globe', 16)} ${t('Changer de langue')}</a>
         </div>
         ${baoSays(mood, esc(message), { size: 128, className: 'hero-bao' })}
       </div>
       <div class="stack hero-actions">
-        ${stats.due > 0 ? `<a class="btn primary block" href="#/session/reviser">Réviser maintenant — ${plural(stats.due, 'élément', 'éléments')}</a>` : ''}
-        ${nextUnit ? `<a class="btn ${stats.due > 0 ? '' : 'primary'} block" href="#/unite/${nextUnit.id}">${stats.seen ? 'Continuer' : 'Commencer'} : ${esc(nextUnit.title)}</a>` : ''}
-        <a class="btn block" href="#/converser">${icon('mic')} Converser avec Bao, le professeur IA</a>
+        ${stats.due > 0 ? `<a class="btn primary block" href="#/session/reviser">${tn(stats.due, 'Réviser maintenant — {n} élément', 'Réviser maintenant — {n} éléments')}</a>` : ''}
+        ${nextUnit ? `<a class="btn ${stats.due > 0 ? '' : 'primary'} block" href="#/unite/${nextUnit.id}">${esc(t(stats.seen ? 'Continuer : {unit}' : 'Commencer : {unit}', { unit: t(nextUnit.title) }))}</a>` : ''}
+        <a class="btn block" href="#/converser">${icon('mic')} ${t('Converser avec Bao, le professeur IA')}</a>
       </div>
     </section>
 
     <section class="card level-card">
       <div class="row spread">
-        <div><p class="eyebrow">Votre progression</p><h2>Niveau ${esc(lvData.cefr)} · ${esc(lvData.name)}</h2></div>
-        <span class="badge">${lv.levels[lv.current].done} / ${levelThreshold(lvData.units.length)} compétences</span>
+        <div><p class="eyebrow">${t('Votre progression')}</p><h2>${esc(t('Niveau {level}', { level: `${lvData.cefr} · ${t(lvData.name)}` }))}</h2></div>
+        <span class="badge">${t('{done} / {total} compétences', { done: lv.levels[lv.current].done, total: levelThreshold(lvData.units.length) })}</span>
       </div>
       <div class="bar"><span style="width:${Math.min(100, Math.round(lv.ratio * 100))}%"></span></div>
-      ${state.profile?.sector ? `<p class="small muted profile-line">Parcours personnalisé · ${esc(findSector(state.profile.sector)?.name ?? '')} · <a href="#/reglages">modifier</a></p>` : `<p class="small muted profile-line"><a href="#/bienvenue">Indiquez votre métier</a> pour un vocabulaire sur mesure.</p>`}
+      ${state.profile?.sector ? `<p class="small muted profile-line">${t('Parcours personnalisé')} · ${esc(t(findSector(state.profile.sector)?.name ?? ''))} · <a href="#/reglages">${t('modifier')}</a></p>` : `<p class="small muted profile-line"><a href="#/bienvenue">${t('Indiquez votre métier')}</a> ${t('pour un vocabulaire sur mesure.')}</p>`}
       ${
         nextLevel
-          ? `<div class="next-gift">${bao('happy', 64, { stage: Math.min(5, st + 1) })}<p class="small">Au niveau <strong>${esc(nextLevel.cefr)}</strong>, Bao recevra une nouvelle tenue et son jardin changera de ciel.</p></div>`
-          : '<p class="small">Vous avez atteint le sommet du programme. Bao vous tire son chapeau !</p>'
+          ? `<div class="next-gift">${bao('happy', 64, { stage: Math.min(5, st + 1) })}<p class="small">${t('Au niveau <strong>{level}</strong>, Bao recevra une nouvelle tenue et son jardin changera de ciel.', { level: esc(nextLevel.cefr) })}</p></div>`
+          : `<p class="small">${t('Vous avez atteint le sommet du programme. Bao vous tire son chapeau !')}</p>`
       }
     </section>
 
     <section class="card challenge ${challengeDone ? 'done' : ''}">
       ${bao(challengeDone ? 'cheer' : 'think', 72)}
       <div>
-        <p class="eyebrow">Défi du jour${challengeDone ? ' · réussi' : ''}</p>
-        <p class="challenge-text">${esc(challenge.text)}</p>
-        <p class="small muted">${challengeDone ? 'Bravo ! Revenez demain pour un nouveau défi.' : `Bonus : ${bambooIcon(14)} +5 bambous. Facultatif, sans pression.`}</p>
+        <p class="eyebrow">${t(challengeDone ? 'Défi du jour · réussi' : 'Défi du jour')}</p>
+        <p class="challenge-text">${esc(t(challenge.text))}</p>
+        <p class="small muted">${challengeDone ? t('Bravo ! Revenez demain pour un nouveau défi.') : `${t('Bonus :')} ${bambooIcon(14)} ${t('+5 bambous. Facultatif, sans pression.')}`}</p>
       </div>
     </section>
 
     <section class="card">${weekWidget()}</section>
 
     <section class="card">
-      <div class="row spread"><h2>Le jardin de Bao</h2><a class="small" href="#/bao">Boutique et trophées ${icon('right', 14)}</a></div>
+      <div class="row spread"><h2>${t('Le jardin de Bao')}</h2><a class="small" href="#/bao">${t('Boutique et trophées')} ${icon('right', 14)}</a></div>
       ${gardenScene()}
     </section>
 
     ${
       showStats
         ? `<section class="grid">
-      <div class="card stat"><div class="num">${stats.mastered}</div><div class="label">éléments maîtrisés<br><span class="small">(révision espacée ≥ 3 semaines)</span></div></div>
-      <div class="card stat"><div class="num">${stats.learning}</div><div class="label">en cours d’apprentissage</div></div>
-      <div class="card stat"><div class="num">${stats.due}</div><div class="label">à réviser aujourd’hui</div></div>
-      <div class="card stat"><div class="num">${lv.unitsDone}</div><div class="label">compétences « Je peux… » validées</div></div>
+      <div class="card stat"><div class="num">${stats.mastered}</div><div class="label">${t('éléments maîtrisés')}<br><span class="small">${t('(révision espacée ≥ 3 semaines)')}</span></div></div>
+      <div class="card stat"><div class="num">${stats.learning}</div><div class="label">${t('en cours d’apprentissage')}</div></div>
+      <div class="card stat"><div class="num">${stats.due}</div><div class="label">${t('à réviser aujourd’hui')}</div></div>
+      <div class="card stat"><div class="num">${lv.unitsDone}</div><div class="label">${t('compétences « Je peux… » validées')}</div></div>
     </section>`
         : ''
     }
     ${showForecast ? forecastCard(stats) : ''}
-    <p><a href="#/pourquoi">Pourquoi Polyglotte est différent de Duolingo ${icon('right', 14)}</a></p>
+    <p><a href="#/pourquoi">${t('Pourquoi Polyglotte est différent de Duolingo')} ${icon('right', 14)}</a></p>
   `;
 }
 
 function forecastCard(stats) {
   const maxF = Math.max(1, ...stats.forecast);
   const dayNames = [
-    'Auj.',
-    'Dem.',
+    t('Auj.'),
+    t('Dem.'),
     ...Array.from({ length: 5 }, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() + i + 2);
-      return d.toLocaleDateString('fr-FR', { weekday: 'short' });
+      return d.toLocaleDateString(uiLocale(), { weekday: 'short' });
     }),
   ];
   return `<section class="card">
-    <h2>Révisions à venir</h2>
-    <p class="muted small">La répétition espacée vous montre ce qui arrive : pas de surprise, pas de pile cachée.</p>
-    <div class="forecast" aria-label="Prévision des révisions sur 7 jours">
+    <h2>${t('Révisions à venir')}</h2>
+    <p class="muted small">${t('La répétition espacée vous montre ce qui arrive : pas de surprise, pas de pile cachée.')}</p>
+    <div class="forecast" aria-label="${esc(t('Prévision des révisions sur 7 jours'))}">
       ${stats.forecast.map((n, i) => `<div><span style="height:${Math.round((n / maxF) * 54)}px"></span>${n}<br>${esc(dayNames[i])}</div>`).join('')}
     </div>
   </section>`;
@@ -188,25 +190,30 @@ function forecastCard(stats) {
 function languageCard(l) {
   const started = Object.keys(state.cards[l.id] ?? {}).length;
   const active = l.id === course().id;
-  return `<button class="lang-card ${active ? 'active' : ''}" data-lang="${esc(l.id)}" data-search="${esc(`${l.name} ${l.native}`.toLowerCase())}">
+  const name = languageName(l);
+  const offline = l.curated && base() === 'fr';
+  return `<button class="lang-card ${active ? 'active' : ''}" data-lang="${esc(l.id)}" data-search="${esc(`${name} ${l.name} ${l.native}`.toLowerCase())}">
     <span class="lang-native" dir="auto">${esc(l.native)}</span>
-    <span class="lang-name">${esc(l.name)}</span>
-    <span class="lang-meta">${l.curated ? '<span class="badge ok">A1 hors ligne</span>' : '<span class="badge">Leçons par IA</span>'}${started ? `<span class="badge">${started} vus</span>` : ''}</span>
+    <span class="lang-name">${esc(name)}</span>
+    <span class="lang-meta">${offline ? `<span class="badge ok">${t('A1 hors ligne')}</span>` : `<span class="badge">${t('Leçons par IA')}</span>`}${started ? `<span class="badge">${t('{n} vus', { n: started })}</span>` : ''}</span>
   </button>`;
 }
 
 function renderLanguages() {
+  // On n'apprend pas sa propre langue de base.
+  const list = [...LANGUAGES, ...state.customLanguages].filter((l) => l.id !== base());
   app.innerHTML = `
-    ${baoSays('wave', 'Quelle langue voulez-vous apprendre ? Toutes sont possibles, du niveau débutant au niveau senior.', { size: 110 })}
-    <h1>Toutes les langues</h1>
-    <label class="field"><span class="sr-only">Rechercher une langue</span><input type="text" id="lang-search" placeholder="Rechercher : japonais, swahili, grec…" autocomplete="off" /></label>
-    <div class="lang-grid" id="lang-grid">${[...LANGUAGES, ...state.customLanguages].map(languageCard).join('')}</div>
+    ${baoSays('wave', esc(t('Quelle langue voulez-vous apprendre ? Toutes sont possibles, du niveau débutant au niveau senior.')), { size: 110 })}
+    <h1>${t('Toutes les langues')}</h1>
+    <p class="muted small base-line">${icon('globe', 14)} ${t('Leçons et traductions en {language}.', { language: esc(languageName(baseLanguage())) })} <a href="#/reglages">${t('Changer ma langue')}</a></p>
+    <label class="field"><span class="sr-only">${t('Rechercher une langue')}</span><input type="text" id="lang-search" placeholder="${esc(t('Rechercher : japonais, swahili, grec…'))}" autocomplete="off" /></label>
+    <div class="lang-grid" id="lang-grid">${list.map(languageCard).join('')}</div>
     <form class="card" id="custom-lang">
-      <h2>Une autre langue ?</h2>
-      <p class="muted small">Créole, langue régionale, langue rare… Donnez son nom : Bao préparera les leçons avec l’IA, du niveau A1 au niveau C2.</p>
-      <div class="row"><input type="text" name="name" maxlength="40" placeholder="ex. Tamoul, Quechua, Corse" class="grow text-input" required /><button class="btn primary" type="submit">Ajouter</button></div>
+      <h2>${t('Une autre langue ?')}</h2>
+      <p class="muted small">${t('Créole, langue régionale, langue rare… Donnez son nom : Bao préparera les leçons avec l’IA, du niveau A1 au niveau C2.')}</p>
+      <div class="row"><input type="text" name="name" maxlength="40" placeholder="${esc(t('ex. Tamoul, Quechua, Corse'))}" class="grow text-input" required /><button class="btn primary" type="submit">${t('Ajouter')}</button></div>
     </form>
-    <p class="muted small">Les langues marquées « A1 hors ligne » ont un niveau débutant écrit à la main. Les autres leçons sont préparées par l’IA puis vérifiées automatiquement ; vous pouvez toujours faire accepter une réponse juste.</p>`;
+    <p class="muted small">${base() === 'fr' ? t('Les langues marquées « A1 hors ligne » ont un niveau débutant écrit à la main. Les autres leçons sont préparées par l’IA puis vérifiées automatiquement ; vous pouvez toujours faire accepter une réponse juste.') : t('Les leçons sont préparées par l’IA dans votre langue, puis vérifiées automatiquement ; vous pouvez toujours faire accepter une réponse juste.')}</p>`;
   $('#lang-search').addEventListener('input', (e) => {
     const q = e.target.value.trim().toLowerCase();
     $$('.lang-card').forEach((el) => (el.hidden = !!q && !el.dataset.search.includes(q)));
@@ -215,8 +222,9 @@ function renderLanguages() {
   $('#custom-lang').addEventListener('submit', (e) => {
     e.preventDefault();
     const lang = customLanguage(new FormData(e.currentTarget).get('name'));
-    if (!lang) return toast('Nom de langue invalide.');
-    const known = LANGUAGES.find((l) => l.name.toLowerCase() === lang.name.toLowerCase());
+    if (!lang) return toast(t('Nom de langue invalide.'));
+    const wanted = lang.name.toLowerCase();
+    const known = LANGUAGES.find((l) => [l.name, l.native, languageName(l)].some((n) => n.toLowerCase() === wanted));
     if (known) return chooseLanguage(known.id);
     if (!state.customLanguages.some((l) => l.id === lang.id)) state.customLanguages.push(lang);
     chooseLanguage(lang.id);
@@ -237,8 +245,8 @@ function renderPath() {
   const lv = level();
   const perso = custom();
   app.innerHTML = `
-    <p class="eyebrow">${esc(c.name)}</p><h1>Parcours</h1>
-    <p class="muted">Du niveau débutant (A1) au niveau senior (C2). Toutes les unités sont ouvertes : commencez par ce qui vous sert, et validez en une minute ce que vous savez déjà.</p>
+    <p class="eyebrow">${esc(courseName())}</p><h1>${t('Parcours')}</h1>
+    <p class="muted">${t('Du niveau débutant (A1) au niveau senior (C2). Toutes les unités sont ouvertes : commencez par ce qui vous sert, et validez en une minute ce que vous savez déjà.')}</p>
     ${c.levels
       .map((l, li) => {
         const info = lv.levels[li];
@@ -246,17 +254,17 @@ function renderPath() {
         return `<section class="level-section ${cls}">
           <header class="level-head">
             <div class="level-bao">${bao(info.complete ? 'proud' : li === lv.current ? 'hello' : 'sleep', 72, { stage: li })}</div>
-            <div class="grow"><p class="eyebrow">${esc(l.cefr)}${info.complete ? ' · terminé' : li === lv.current ? ' · en cours' : ''}</p><h2>${esc(l.name)}</h2><p class="muted small">${esc(l.tagline)}</p></div>
+            <div class="grow"><p class="eyebrow">${esc(l.cefr)}${info.complete ? ` · ${t('terminé')}` : li === lv.current ? ` · ${t('en cours')}` : ''}</p><h2>${esc(t(l.name))}</h2><p class="muted small">${esc(t(l.tagline))}</p></div>
             <span class="badge ${info.complete ? 'ok' : ''}">${info.done} / ${info.total}</span>
           </header>
           ${l.units
             .map((u, ui) => {
               const p = unitProgress(u, cards());
-              const head = ui === 0 || trackOf(l.units[ui - 1]) !== trackOf(u) ? `<p class="track-title track-${trackOf(u)}">${esc(TRACKS[trackOf(u)].name)}${trackOf(u) === 'metier' && state.profile?.sector ? ` · ${esc(findSector(state.profile.sector)?.name ?? '')}` : ''}</p>` : '';
+              const head = ui === 0 || trackOf(l.units[ui - 1]) !== trackOf(u) ? `<p class="track-title track-${trackOf(u)}">${esc(t(TRACKS[trackOf(u)].name))}${trackOf(u) === 'metier' && state.profile?.sector ? ` · ${esc(t(findSector(state.profile.sector)?.name ?? ''))}` : ''}</p>` : '';
               return `${head}<a class="card unit track-${trackOf(u)}" href="#/unite/${u.id}">
-                <div class="row spread"><h3><span class="unit-num">${String(u.number).padStart(2, '0')}</span>${esc(u.title)}</h3>
-                ${!u.ready ? '<span class="badge">À préparer</span>' : p.canDo ? `<span class="badge ok">${icon('check', 14)} Validée</span>` : `<span class="badge">${p.known} / ${p.total}</span>`}</div>
-                <p>${esc(u.canDo)}</p>
+                <div class="row spread"><h3><span class="unit-num">${String(u.number).padStart(2, '0')}</span>${esc(t(u.title))}</h3>
+                ${!u.ready ? `<span class="badge">${t('À préparer')}</span>` : p.canDo ? `<span class="badge ok">${icon('check', 14)} ${t('Validée')}</span>` : `<span class="badge">${p.known} / ${p.total}</span>`}</div>
+                <p>${esc(t(u.canDo))}</p>
                 ${u.ready ? `<div class="bar" aria-hidden="true"><span style="width:${Math.round(p.ratio * 100)}%"></span></div>` : ''}
               </a>`;
             })
@@ -265,8 +273,8 @@ function renderPath() {
       })
       .join('')}
     <a class="card unit" href="#/vocabulaire">
-      <div class="row spread"><h3>Mon vocabulaire</h3><span class="badge">${perso.length} mot${perso.length > 1 ? 's' : ''}</span></div>
-      <p>Vos propres mots, intégrés à la répétition espacée.</p>
+      <div class="row spread"><h3>${t('Mon vocabulaire')}</h3><span class="badge">${tn(perso.length, '{n} mot', '{n} mots')}</span></div>
+      <p>${t('Vos propres mots, intégrés à la répétition espacée.')}</p>
     </a>`;
 }
 
@@ -279,47 +287,47 @@ function renderUnit(unitId) {
 
   const p = unitProgress(u, cards());
   const fresh = u.items.filter((it) => (cards()[it.id]?.stage ?? 0) === 0).length;
-  const levelLabel = (st) => ['Nouveau', 'Découvert', 'Reconnu', 'Rappel', 'Production', 'Production'][st] ?? 'Nouveau';
+  const levelLabel = (st) => t(['Nouveau', 'Découvert', 'Reconnu', 'Rappel', 'Production', 'Production'][st] ?? 'Nouveau');
   const lvl = course().levels[u.levelIndex];
 
   app.innerHTML = `
-    <p><a class="back" href="#/parcours">${icon('left', 14)} Parcours</a></p>
-    <p class="eyebrow">${esc(lvl.cefr)} · ${esc(TRACKS[trackOf(u)].name)} · Unité ${u.number}</p>
-    <h1>${esc(u.title)}</h1>
-    <p class="row"><span class="badge ${p.canDo ? 'ok' : ''}">${p.canDo ? icon('check', 14) : ''} ${esc(u.canDo)}</span>${u.source === 'ai' ? '<span class="badge">Préparée par l’IA</span>' : ''}</p>
+    <p><a class="back" href="#/parcours">${icon('left', 14)} ${t('Parcours')}</a></p>
+    <p class="eyebrow">${esc(lvl.cefr)} · ${esc(t(TRACKS[trackOf(u)].name))} · ${t('Unité {n}', { n: u.number })}</p>
+    <h1>${esc(t(u.title))}</h1>
+    <p class="row"><span class="badge ${p.canDo ? 'ok' : ''}">${p.canDo ? icon('check', 14) : ''} ${esc(t(u.canDo))}</span>${u.source === 'ai' ? `<span class="badge">${t('Préparée par l’IA')}</span>` : ''}</p>
     <div class="stack actions" style="margin-bottom:18px">
-      <a class="btn primary block" href="#/session/apprendre/${u.id}">${fresh ? `Apprendre (${plural(fresh, 'nouvel élément', 'nouveaux éléments')})` : 'Retravailler cette unité'}</a>
+      <a class="btn primary block" href="#/session/apprendre/${u.id}">${fresh ? tn(fresh, 'Apprendre ({n} nouvel élément)', 'Apprendre ({n} nouveaux éléments)') : t('Retravailler cette unité')}</a>
       <div class="row">
-        <a class="btn" href="#/session/role/${u.id}">${icon('dialogue')} Jeu de rôle</a>
-        <a class="btn" href="#/converser/${u.id}">${icon('mic')} En parler avec Bao</a>
-        ${p.canDo ? '' : `<a class="btn" href="#/session/test/${u.id}">${icon('target')} Je connais déjà</a>`}
+        <a class="btn" href="#/session/role/${u.id}">${icon('dialogue')} ${t('Jeu de rôle')}</a>
+        <a class="btn" href="#/converser/${u.id}">${icon('mic')} ${t('En parler avec Bao')}</a>
+        ${p.canDo ? '' : `<a class="btn" href="#/session/test/${u.id}">${icon('target')} ${t('Je connais déjà')}</a>`}
       </div>
     </div>
 
     <section class="card grammar with-bao">
       ${bao('read', 92)}
-      <div><h2>Comprendre : ${esc(u.grammar.title)}</h2>
+      <div><h2>${t('Comprendre :')} ${esc(u.grammar.title)}</h2>
       <ul>${u.grammar.body.map((b) => `<li>${esc(b)}</li>`).join('')}</ul></div>
     </section>
 
     <section class="card">
-      <div class="row spread"><h2>En situation</h2><button class="btn ghost" id="toggle-tr">Masquer la traduction</button></div>
+      <div class="row spread"><h2>${t('En situation')}</h2><button class="btn ghost" id="toggle-tr">${t('Masquer la traduction')}</button></div>
       <ul class="dialogue">
         ${u.dialogue.map((l) => `<li class="${l.who}"><div class="bubble">${targetText(l.target, l.translit)} ${audioBtn(l.target)}<span class="tr">${esc(l.fr)}</span></div></li>`).join('')}
       </ul>
-      ${caps().audio ? `<button class="btn" id="play-all">${icon('play', 16)} Écouter tout le dialogue</button>` : ''}
+      ${caps().audio ? `<button class="btn" id="play-all">${icon('play', 16)} ${t('Écouter tout le dialogue')}</button>` : ''}
     </section>
 
     ${
       u.fact
         ? p.canDo
-          ? `<section class="card fact">${bao('surprise', 80)}<div><p class="eyebrow">Bonus débloqué · Le saviez-vous ?</p><p>${esc(u.fact)}</p></div></section>`
-          : `<section class="card fact locked">${bao('think', 80)}<div><p class="eyebrow">${icon('lock', 12)} Bonus · Le saviez-vous ?</p><p class="muted">Validez cette compétence pour découvrir l’anecdote culturelle de Bao.</p></div></section>`
+          ? `<section class="card fact">${bao('surprise', 80)}<div><p class="eyebrow">${t('Bonus débloqué · Le saviez-vous ?')}</p><p>${esc(u.fact)}</p></div></section>`
+          : `<section class="card fact locked">${bao('think', 80)}<div><p class="eyebrow">${icon('lock', 12)} ${t('Bonus · Le saviez-vous ?')}</p><p class="muted">${t('Validez cette compétence pour découvrir l’anecdote culturelle de Bao.')}</p></div></section>`
         : ''
     }
 
     <section class="card">
-      <h2>Phrases de l’unité</h2>
+      <h2>${t('Phrases de l’unité')}</h2>
       <ul class="item-list">
         ${u.items
           .map((it) => {
@@ -333,7 +341,7 @@ function renderUnit(unitId) {
   $('#toggle-tr').addEventListener('click', (e) => {
     const hidden = $$('.tr').some((el) => el.hidden);
     $$('.tr').forEach((el) => (el.hidden = !hidden));
-    e.currentTarget.textContent = hidden ? 'Masquer la traduction' : 'Afficher la traduction';
+    e.currentTarget.textContent = t(hidden ? 'Masquer la traduction' : 'Afficher la traduction');
   });
   $('#play-all')?.addEventListener('click', async () => {
     for (const l of u.dialogue) {
@@ -346,39 +354,39 @@ function renderUnit(unitId) {
 function renderUnitGeneration(u) {
   const lvl = course().levels[u.levelIndex];
   app.innerHTML = `
-    <p><a class="back" href="#/parcours">${icon('left', 14)} Parcours</a></p>
-    <p class="eyebrow">${esc(lvl.cefr)} · Unité ${u.number}</p>
-    <h1>${esc(u.title)}</h1>
+    <p><a class="back" href="#/parcours">${icon('left', 14)} ${t('Parcours')}</a></p>
+    <p class="eyebrow">${esc(lvl.cefr)} · ${t('Unité {n}', { n: u.number })}</p>
+    <h1>${esc(t(u.title))}</h1>
     <section class="card center generate" id="gen">
       ${bao('write', 150)}
-      <h2>Bao va préparer cette leçon</h2>
-      <p class="muted">${esc(u.canDo)}<br>Phrases utiles, fiche de grammaire, dialogue et anecdote culturelle en ${esc(langName())}, adaptés au niveau ${esc(lvl.cefr)}.</p>
-      <button class="btn primary" id="generate">${icon('sparkle')} Préparer la leçon</button>
-      <p class="small muted">Cela prend environ une minute. Une fois prête, la leçon reste disponible hors ligne.</p>
+      <h2>${t('Bao va préparer cette leçon')}</h2>
+      <p class="muted">${esc(t(u.canDo))}<br>${esc(t('Phrases utiles, fiche de grammaire, dialogue et anecdote culturelle en {language}, adaptés au niveau {level}.', { language: langName(), level: lvl.cefr }))}</p>
+      <button class="btn primary" id="generate">${icon('sparkle')} ${t('Préparer la leçon')}</button>
+      <p class="small muted">${t('Cela prend environ une minute. Une fois prête, la leçon reste disponible hors ligne.')}</p>
     </section>`;
   $('#generate').addEventListener('click', () => generate(u));
 }
 
 async function generate(u) {
   const box = $('#gen');
-  box.innerHTML = `${bao('write', 150)}<h2>Bao écrit votre leçon…</h2><p class="muted">Il choisit les phrases, vérifie la grammaire et prépare le dialogue.</p><p class="typing"><span></span><span></span><span></span></p>`;
+  box.innerHTML = `${bao('write', 150)}<h2>${t('Bao écrit votre leçon…')}</h2><p class="muted">${t('Il choisit les phrases, vérifie la grammaire et prépare le dialogue.')}</p><p class="typing"><span></span><span></span><span></span></p>`;
   const lang = { id: course().id, name: course().name, native: course().native };
   try {
     const sector = u.track === 'metier' ? state.profile?.sector ?? null : null;
-    const unit = await requestUnit({ language: lang, unitId: u.id, sector: sector ?? (u.track === 'metier' ? 'general' : null) });
+    const unit = await requestUnit({ language: lang, unitId: u.id, sector: sector ?? (u.track === 'metier' ? 'general' : null), base: course().base });
     state.generated[lang.id] ??= {};
     state.generated[lang.id][u.contentKey] = unit;
     if (unit.speechLang && !state.generated[lang.id].__meta) state.generated[lang.id].__meta = { speechLang: unit.speechLang };
     invalidateCourse();
     persist();
-    toast('Leçon prête !');
+    toast(t('Leçon prête !'));
     if (location.hash === `#/unite/${u.id}`) renderUnit(u.id);
   } catch (err) {
     if (!document.body.contains(box)) return;
     const unavailable = err instanceof GeneratorUnavailable;
-    box.innerHTML = `${bao('comfort', 140)}<h2>${unavailable ? 'Leçon bientôt disponible' : 'Oups, la leçon n’a pas pu être préparée'}</h2>
+    box.innerHTML = `${bao('comfort', 140)}<h2>${t(unavailable ? 'Leçon bientôt disponible' : 'Oups, la leçon n’a pas pu être préparée')}</h2>
       <p class="muted">${esc(err.message)}</p>
-      ${unavailable ? '<p class="small muted">Pour l’activer, la personne qui héberge Polyglotte doit définir la variable ANTHROPIC_API_KEY puis lancer <code>npm start</code>. En attendant, les langues marquées « A1 hors ligne » fonctionnent entièrement.</p>' : '<button class="btn primary" id="retry">Réessayer</button>'}`;
+      ${unavailable ? `<p class="small muted">${t('Pour l’activer, la personne qui héberge Polyglotte doit définir la variable ANTHROPIC_API_KEY puis lancer <code>npm start</code>.')} ${base() === 'fr' ? t('En attendant, les langues marquées « A1 hors ligne » fonctionnent entièrement.') : ''}</p>` : `<button class="btn primary" id="retry">${t('Réessayer')}</button>`}`;
     $('#retry')?.addEventListener('click', () => generate(u));
   }
 }
@@ -388,20 +396,20 @@ async function generate(u) {
 function renderVocab() {
   const list = custom();
   app.innerHTML = `
-    ${baoSays('write', 'Notez ici les mots dont <em>vous</em> avez besoin : travail, voyage, passions. Je les ferai réviser au bon moment.', { size: 100 })}
-    <p class="eyebrow">${esc(course().name)}</p><h1>Mon vocabulaire</h1>
+    ${baoSays('write', t('Notez ici les mots dont <em>vous</em> avez besoin : travail, voyage, passions. Je les ferai réviser au bon moment.'), { size: 100 })}
+    <p class="eyebrow">${esc(courseName())}</p><h1>${t('Mon vocabulaire')}</h1>
     <form class="card" id="vocab-form">
-      <label class="field"><span>En français</span><input type="text" name="fr" required maxlength="120" placeholder="ex. un rendez-vous" /></label>
-      <label class="field"><span>En ${esc(langName())}</span><input type="text" name="target" required maxlength="120" dir="auto" lang="${esc(course().speechLang)}" /></label>
-      <label class="field"><span>Autres réponses acceptées <span class="muted small">(facultatif, séparées par ;)</span></span><input type="text" name="alts" maxlength="240" dir="auto" /></label>
-      <button class="btn primary" type="submit">Ajouter</button>
+      <label class="field"><span>${esc(t('En {language}', { language: languageNameInline(baseLanguage()) }))}</span><input type="text" name="fr" required maxlength="120" dir="auto" placeholder="${esc(t('ex. un rendez-vous'))}" /></label>
+      <label class="field"><span>${esc(t('En {language}', { language: langName() }))}</span><input type="text" name="target" required maxlength="120" dir="auto" lang="${esc(course().speechLang)}" /></label>
+      <label class="field"><span>${t('Autres réponses acceptées')} <span class="muted small">${t('(facultatif, séparées par ;)')}</span></span><input type="text" name="alts" maxlength="240" dir="auto" /></label>
+      <button class="btn primary" type="submit">${t('Ajouter')}</button>
     </form>
     ${
       list.length
         ? `<section class="card">
-            <div class="row spread"><h2>${plural(list.length, 'mot', 'mots')}</h2><a class="btn primary" href="#/session/apprendre/perso">Apprendre mes mots</a></div>
+            <div class="row spread"><h2>${tn(list.length, '{n} mot', '{n} mots')}</h2><a class="btn primary" href="#/session/apprendre/perso">${t('Apprendre mes mots')}</a></div>
             <ul class="item-list">${list
-              .map((it) => `<li><span>${targetText(it.target)} ${audioBtn(it.target)}<br><span class="muted small">${esc(it.fr)}</span></span><button class="btn ghost" data-del="${esc(it.id)}" aria-label="Supprimer ${esc(it.target)}">Supprimer</button></li>`)
+              .map((it) => `<li><span>${targetText(it.target)} ${audioBtn(it.target)}<br><span class="muted small">${esc(it.fr)}</span></span><button class="btn ghost" data-del="${esc(it.id)}" aria-label="${esc(t('Supprimer {word}', { word: it.target }))}">${t('Supprimer')}</button></li>`)
               .join('')}</ul>
           </section>`
         : ''
@@ -416,7 +424,7 @@ function renderVocab() {
     const alts = String(f.get('alts') ?? '').split(';').map((s) => s.trim()).filter(Boolean);
     custom().push({ id: `perso-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, fr, target, alts });
     persist();
-    toast('Mot ajouté.');
+    toast(t('Mot ajouté.'));
     renderVocab();
     $('input[name="fr"]').focus();
   });
@@ -435,48 +443,57 @@ function renderVocab() {
 function renderSettings() {
   const s = state.settings;
   app.innerHTML = `
-    <h1>Réglages</h1>
+    <h1>${t('Réglages')}</h1>
     <form class="card" id="settings">
-      <div class="field"><span>Langue apprise</span><a class="btn" href="#/langues">${icon('globe')} ${esc(course().name)} — changer</a></div>
-      <label class="field"><span>Mon secteur professionnel</span>
-        <select name="sector"><option value="">Non précisé</option>${SECTORS.map((x) => `<option value="${x.id}" ${state.profile?.sector === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+      <label class="field"><span>${t('Ma langue (interface, traductions et explications)')}</span>
+        ${baseSelect('baseLang')}
+        <span class="muted small">${esc(baseHint())}</span>
       </label>
-      <label class="field"><span>Mon objectif</span>
-        <select name="goal">${GOALS.map((x) => `<option value="${x.id}" ${state.profile?.goal === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+      <div class="field"><span>${t('Langue apprise')}</span><a class="btn" href="#/langues">${icon('globe')} ${esc(t('{language} — changer', { language: courseName() }))}</a></div>
+      <label class="field"><span>${t('Mon secteur professionnel')}</span>
+        <select name="sector"><option value="">${t('Non précisé')}</option>${SECTORS.map((x) => `<option value="${x.id}" ${state.profile?.sector === x.id ? 'selected' : ''}>${esc(t(x.name))}</option>`).join('')}</select>
       </label>
-      <label class="field"><span>Nouveaux éléments par session</span>
+      <label class="field"><span>${t('Mon objectif')}</span>
+        <select name="goal">${GOALS.map((x) => `<option value="${x.id}" ${state.profile?.goal === x.id ? 'selected' : ''}>${esc(t(x.name))}</option>`).join('')}</select>
+      </label>
+      <label class="field"><span>${t('Nouveaux éléments par session')}</span>
         <input type="number" name="newPerSession" min="1" max="10" value="${s.newPerSession}" />
       </label>
-      <label class="field"><span>Objectif : jours d’entraînement par semaine</span>
+      <label class="field"><span>${t('Objectif : jours d’entraînement par semaine')}</span>
         <input type="number" name="weeklyGoal" min="1" max="7" value="${s.weeklyGoal}" />
       </label>
       <label class="check"><input type="checkbox" name="audio" ${s.audio ? 'checked' : ''} ${canSpeak() ? '' : 'disabled'} />
-        <span>Audio (écoute, dictée et voix de Bao)${canSpeak() ? '' : ' — non disponible dans ce navigateur'}</span></label>
+        <span>${t('Audio (écoute, dictée et voix de Bao)')}${canSpeak() ? '' : ` — ${t('non disponible dans ce navigateur')}`}</span></label>
       <label class="check"><input type="checkbox" name="speaking" ${s.speaking ? 'checked' : ''} ${canRecognize() ? '' : 'disabled'} />
-        <span>Micro (exercices oraux et conversation avec Bao)${canRecognize() ? '' : ' — non disponible dans ce navigateur (essayez Chrome ou Edge)'}</span></label>
+        <span>${t('Micro (exercices oraux et conversation avec Bao)')}${canRecognize() ? '' : ` — ${t('non disponible dans ce navigateur (essayez Chrome ou Edge)')}`}</span></label>
       <label class="check"><input type="checkbox" name="strictAccents" ${s.strictAccents ? 'checked' : ''} />
-        <span>Mode strict : un accent manquant compte comme une erreur</span></label>
+        <span>${t('Mode strict : un accent manquant compte comme une erreur')}</span></label>
     </form>
 
     <section class="card">
-      <h2>Vos données</h2>
-      <p class="muted small">Pas de compte : votre progression, vos bambous et vos leçons restent sur cet appareil. Exportez-les pour les sauvegarder ou les transférer.</p>
+      <h2>${t('Vos données')}</h2>
+      <p class="muted small">${t('Pas de compte : votre progression, vos bambous et vos leçons restent sur cet appareil. Exportez-les pour les sauvegarder ou les transférer.')}</p>
       <div class="row">
-        <button class="btn" id="export">${icon('download')} Exporter</button>
-        <label class="btn">${icon('upload')} Importer<input type="file" id="import" accept="application/json" hidden /></label>
-        <button class="btn ghost" id="reset">Réinitialiser ${esc(langName())}</button>
+        <button class="btn" id="export">${icon('download')} ${t('Exporter')}</button>
+        <label class="btn">${icon('upload')} ${t('Importer')}<input type="file" id="import" accept="application/json" hidden /></label>
+        <button class="btn ghost" id="reset">${esc(t('Réinitialiser : {language}', { language: courseName() }))}</button>
       </div>
     </section>`;
 
   $('#settings').addEventListener('change', (e) => {
     const el = e.target;
+    if (el.name === 'baseLang') {
+      setBase(el.value);
+      toast(t('Réglage enregistré.'));
+      return renderSettings();
+    }
     if (el.name === 'sector' || el.name === 'goal') {
       state.profile = { ...(state.profile ?? {}), [el.name]: el.value || null };
       invalidateCourse();
     } else if (el.type === 'checkbox') s[el.name] = el.checked;
     else if (el.type === 'number') s[el.name] = Math.min(Number(el.max), Math.max(Number(el.min), Number(el.value) || 1));
     persist();
-    toast('Réglage enregistré.');
+    toast(t('Réglage enregistré.'));
   });
   $('#export').addEventListener('click', () => {
     const blob = new Blob([store.exportJSON(state)], { type: 'application/json' });
@@ -492,17 +509,18 @@ function renderSettings() {
     try {
       replaceState(store.importJSON(await file.text()));
       persist();
-      toast('Progression importée.');
+      refreshUi();
+      toast(t('Progression importée.'));
       renderSettings();
     } catch (err) {
       toast(err.message);
     }
   });
   $('#reset').addEventListener('click', () => {
-    if (!confirm(`Effacer toute votre progression en ${langName()} ? Vos bambous et trophées sont conservés.`)) return;
+    if (!confirm(t('Effacer toute votre progression en {language} ? Vos bambous et trophées sont conservés.', { language: langName() }))) return;
     state.cards[course().id] = {};
     persist();
-    toast('Progression réinitialisée.');
+    toast(t('Progression réinitialisée.'));
   });
 }
 
@@ -510,24 +528,38 @@ function renderSettings() {
 
 function renderWhy() {
   const points = [
-    ['Un vrai professeur qui vous parle', 'Bao, le professeur IA, converse avec vous à l’oral dans la langue apprise, corrige avec bienveillance et vous souffle des idées de réponse.'],
-    ['Toutes les langues, du débutant au senior', 'Plus de 45 langues au catalogue, et n’importe quelle autre sur simple demande, sur un programme commun de A1 à C2.'],
-    ['Pas de vies, pas de cœurs', 'Une erreur ne vous bloque jamais : l’élément revient simplement plus loin dans la session.'],
-    ['Un objectif hebdomadaire, pas une série quotidienne', 'Vous choisissez combien de jours par semaine. Les jours de repos ne vous font rien perdre.'],
-    ['Des bonus qui récompensent l’apprentissage', 'Les bambous se gagnent en ancrant des mots et en validant des compétences, jamais en cliquant ou en payant.'],
-    ['Produire, pas seulement reconnaître', 'Chaque élément progresse : découverte → choix → écoute → rappel écrit → dictée et oral.'],
-    ['Des corrections qui expliquent', 'Accent, faute de frappe, article, ordre des mots, mot manquant : on vous dit précisément quoi. Et si votre réponse était juste, vous pouvez la faire accepter.'],
-    ['La grammaire expliquée', 'Chaque unité a sa fiche « Comprendre », et chaque erreur affiche la règle concernée.'],
-    ['Des situations réelles', 'Café, ville, entretien, débat… avec un dialogue à écouter et un jeu de rôle.'],
-    ['Liberté de parcours', 'Toutes les unités sont ouvertes. Un test d’une minute permet de valider ce que vous savez déjà.'],
-    ['Répétition espacée transparente', 'Vous voyez ce qui est à réviser et ce qui arrive dans la semaine.'],
-    ['Vos données vous appartiennent', 'Sans compte, utilisable hors ligne, progression exportable.'],
+    [t('Un vrai professeur qui vous parle'), t('Bao, le professeur IA, converse avec vous à l’oral dans la langue apprise, corrige avec bienveillance et vous souffle des idées de réponse.')],
+    [t('Toutes les langues, du débutant au senior'), t('Plus de 45 langues au catalogue, et n’importe quelle autre sur simple demande, sur un programme commun de A1 à C2.')],
+    [t('Dans votre langue'), t('L’interface, les traductions et les explications s’adaptent automatiquement à votre pays. Vous pouvez la changer à tout moment.')],
+    [t('Pas de vies, pas de cœurs'), t('Une erreur ne vous bloque jamais : l’élément revient simplement plus loin dans la session.')],
+    [t('Un objectif hebdomadaire, pas une série quotidienne'), t('Vous choisissez combien de jours par semaine. Les jours de repos ne vous font rien perdre.')],
+    [t('Des bonus qui récompensent l’apprentissage'), t('Les bambous se gagnent en ancrant des mots et en validant des compétences, jamais en cliquant ou en payant.')],
+    [t('Produire, pas seulement reconnaître'), t('Chaque élément progresse : découverte → choix → écoute → rappel écrit → dictée et oral.')],
+    [t('Des corrections qui expliquent'), t('Accent, faute de frappe, article, ordre des mots, mot manquant : on vous dit précisément quoi. Et si votre réponse était juste, vous pouvez la faire accepter.')],
+    [t('La grammaire expliquée'), t('Chaque unité a sa fiche « Comprendre », et chaque erreur affiche la règle concernée.')],
+    [t('Des situations réelles'), t('Café, ville, entretien, débat… avec un dialogue à écouter et un jeu de rôle.')],
+    [t('Liberté de parcours'), t('Toutes les unités sont ouvertes. Un test d’une minute permet de valider ce que vous savez déjà.')],
+    [t('Répétition espacée transparente'), t('Vous voyez ce qui est à réviser et ce qui arrive dans la semaine.')],
+    [t('Vos données vous appartiennent'), t('Sans compte, utilisable hors ligne, progression exportable.')],
   ];
   app.innerHTML = `
-    ${baoSays('proud', 'Polyglotte part des critiques les plus fréquentes faites à Duolingo et y répond une par une.', { size: 110 })}
-    <h1>Pourquoi Polyglotte ?</h1>
-    <section class="card"><ul class="why">${points.map(([t, d]) => `<li><strong>${esc(t)}</strong><span class="muted">${esc(d)}</span></li>`).join('')}</ul></section>
-    <a class="btn primary" href="#/">Commencer</a>`;
+    ${baoSays('proud', esc(t('Polyglotte part des critiques les plus fréquentes faites à Duolingo et y répond une par une.')), { size: 110 })}
+    <h1>${t('Pourquoi Polyglotte ?')}</h1>
+    <section class="card"><ul class="why">${points.map(([title, d]) => `<li><strong>${esc(title)}</strong><span class="muted">${esc(d)}</span></li>`).join('')}</ul></section>
+    <a class="btn primary" href="#/">${t('Commencer')}</a>`;
+}
+
+// ---------- Langue de base ----------
+
+function baseHint() {
+  const country = state.settings.country;
+  let name = '';
+  try {
+    name = country ? new Intl.DisplayNames([uiLocale()], { type: 'region' }).of(country) ?? '' : '';
+  } catch {
+    /* Intl incomplet */
+  }
+  return state.settings.baseAuto && name ? t('Choisie automatiquement d’après votre pays : {country}.', { country: name }) : t('Les leçons déjà préparées dans une autre langue restent disponibles si vous revenez à celle-ci.');
 }
 
 // ---------- Démarrage ----------
@@ -547,8 +579,10 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Ouverture : l'application se prépare derrière l'animation de Bao, puis
-// un nouvel apprenant est accueilli par le questionnaire de bienvenue.
+// Ouverture : la langue de base est choisie d'après le pays, l'application se
+// prépare derrière l'animation de Bao, puis un nouvel apprenant est accueilli
+// par le questionnaire de bienvenue.
+initLocale({ onChange: router });
 if (!state.profile && !location.hash.startsWith('#/bienvenue')) location.replace('#/bienvenue');
 router();
 load3D();

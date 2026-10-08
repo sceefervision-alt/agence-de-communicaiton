@@ -72,3 +72,28 @@ test('allemand : ß peut être tapé ss ; italien : apostrophe finale facultativ
   assert.equal(checkAnswer('Ich heisse Anna', ['Ich heiße Anna.'], { lang: 'de' }).status, 'correct');
   assert.equal(checkAnswer('Un po di più', ["Un po' di più."], { lang: 'it' }).status, 'correct');
 });
+
+test('langue de base : contenu écrit à la main réservé aux francophones', () => {
+  const fr = buildCourse('es');
+  assert.equal(fr.base, 'fr');
+  assert.ok(fr.curated && fr.units[0].ready);
+  const en = buildCourse('es', { base: 'en' });
+  assert.equal(en.base, 'en');
+  assert.ok(!en.curated && !en.units[0].ready);
+  assert.equal(en.units[0].contentKey, 'a1-1~en');
+  assert.equal(en.units.find((u) => u.id === 'a1-m').contentKey, 'a1-m@general~en');
+});
+
+test('langue de base : le contenu généré est rangé par langue de base', () => {
+  const unit = { grammar: { title: 't', body: ['b'] }, items: [{ id: 'es-a1-1~en-1', fr: 'Hello!', target: '¡Hola!' }], dialogue: [], fact: null };
+  const c = buildCourse('es', { base: 'en', generated: { es: { 'a1-1~en': unit } } });
+  assert.equal(c.units[0].ready, true);
+  assert.equal(c.units[0].items[0].fr, 'Hello!');
+  assert.equal(buildCourse('es', { generated: { es: { 'a1-1~en': unit } } }).units[0].items[0].id, 'es-1-1');
+});
+
+test('on n’apprend pas sa propre langue de base ; le français est apprenable', () => {
+  assert.equal(buildCourse('en', { base: 'en' }), null);
+  assert.ok(buildCourse('fr', { base: 'en' }));
+  assert.equal(buildCourse('fr'), null);
+});

@@ -36,6 +36,6 @@ l'application.
 - Comptes optionnels et synchronisation multi-appareils.
 - Contenus authentiques gradués (articles, podcasts courts) en complément des unités.
 - Relecture humaine des leçons générées pour les langues les plus demandées, éditeur de contenu pour les enseignants.
-- Interface traduite pour les apprenants non francophones.
+- Leçons A1 écrites à la main pour d'autres langues de base que le français (anglais, espagnol, arabe…), pour un démarrage hors ligne partout.
 - Voix de synthèse premium côté serveur pour les langues mal couvertes par les navigateurs.
 - Algorithme FSRS à la place de SM-2 une fois assez de données collectées.

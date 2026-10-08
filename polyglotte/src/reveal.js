@@ -4,6 +4,7 @@
 
 import { load3D, get3D, baoSlot } from './visual.js';
 import { confetti } from './confetti.js';
+import { t } from './i18n.js';
 
 const queue = [];
 let active = false;
@@ -44,18 +45,18 @@ async function next() {
   overlay.setAttribute('aria-label', item.title);
   overlay.innerHTML = `
     <div class="reveal-card">
-      <p class="eyebrow">${esc(item.eyebrow ?? 'Bonus')}</p>
+      <p class="eyebrow">${esc(item.eyebrow ?? t('Bonus'))}</p>
       <h2>${esc(item.title)}</h2>
       <div class="reveal-stage ${openable ? 'openable' : ''}" id="reveal-stage">
         ${openable ? (st ? '' : `<div class="css-gift ${item.kind}"></div>`) : baoSlot({ ...(item.bao ?? {}), size: 220, live: true })}
       </div>
-      <p class="reveal-hint">${openable ? 'Touchez pour ouvrir' : ''}</p>
+      <p class="reveal-hint">${openable ? t('Touchez pour ouvrir') : ''}</p>
       <div class="reveal-result" ${openable ? 'hidden' : ''}>
-        ${item.amount ? `<p class="reveal-amount"><span class="amount">+0</span> bambous</p>` : ''}
+        ${item.amount ? `<p class="reveal-amount"><span class="amount">+0</span> ${t('bambous')}</p>` : ''}
         ${item.text ? `<p class="muted">${esc(item.text)}</p>` : ''}
         ${item.resultHtml ?? ''}
       </div>
-      <button class="btn primary" id="reveal-btn">${openable ? 'Ouvrir' : 'Merveilleux !'}</button>
+      <button class="btn primary" id="reveal-btn">${t(openable ? 'Ouvrir' : 'Merveilleux !')}</button>
     </div>`;
   document.body.append(overlay);
   requestAnimationFrame(() => overlay.classList.add('in'));
@@ -75,7 +76,7 @@ async function next() {
     const amount = overlay.querySelector('.amount');
     if (amount) countUp(amount, item.amount);
     confetti();
-    btn.textContent = 'Super !';
+    btn.textContent = t('Super !');
     btn.disabled = false;
     btn.focus();
   };

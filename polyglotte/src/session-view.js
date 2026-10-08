@@ -7,6 +7,7 @@ import { buildSession, buildTestOut, buildRoleplay, requeue, acceptedAnswers, TE
 import { recognize } from './speech.js';
 import { reveal } from './reveal.js';
 import { confetti } from './confetti.js';
+import { t, N } from './i18n.js';
 import {
   state, app, persist, esc, $, $$, toast, icon, course, cards, custom, extraAlts, langName, caps, say, bao,
   audioBtn, bindAudio, targetText, weekWidget, snapshot, finishActivity, rewardsHtml, updateBambooCounter,
@@ -26,9 +27,9 @@ export function startSession(mode, unitId) {
   else if (mode === 'test') queue = buildTestOut(c, unitId);
 
   if (!queue.length) {
-    app.innerHTML = `<section class="card center">${bao('sleep', 140)}<h1>Rien à faire ici pour l’instant</h1>
-      <p class="muted">${mode === 'reviser' ? 'Commencez une unité : Bao vous préparera ensuite vos révisions.' : 'Cette leçon n’est pas encore prête.'}</p>
-      <a class="btn primary" href="#/parcours">Voir le parcours</a></section>`;
+    app.innerHTML = `<section class="card center">${bao('sleep', 140)}<h1>${t('Rien à faire ici pour l’instant')}</h1>
+      <p class="muted">${t(mode === 'reviser' ? 'Commencez une unité : Bao vous préparera ensuite vos révisions.' : 'Cette leçon n’est pas encore prête.')}</p>
+      <a class="btn primary" href="#/parcours">${t('Voir le parcours')}</a></section>`;
     return;
   }
   S = {
@@ -56,7 +57,7 @@ function summaryOf(s) {
 function sessionHeader(mood = 'think') {
   const pct = Math.round((S.index / S.queue.length) * 100);
   return `<div class="session-head">
-    <a class="btn ghost" href="#/" aria-label="Quitter la session">${icon('close')}</a>
+    <a class="btn ghost" href="#/" aria-label="${esc(t('Quitter la session'))}">${icon('close')}</a>
     <div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>
     <div class="mini-bao" id="mini-bao">${bao(mood, 56)}</div>
   </div>`;
@@ -70,7 +71,7 @@ function setMiniBao(mood) {
 function charsBar() {
   const chars = course().specialChars;
   if (!chars.length) return '';
-  return `<div class="chars" aria-label="Caractères spéciaux">${chars.map((ch) => `<button type="button" class="btn" data-char="${esc(ch)}">${esc(ch)}</button>`).join('')}</div>`;
+  return `<div class="chars" aria-label="${esc(t('Caractères spéciaux'))}">${chars.map((ch) => `<button type="button" class="btn" data-char="${esc(ch)}">${esc(ch)}</button>`).join('')}</div>`;
 }
 
 function bindInput(onSubmit) {
@@ -98,10 +99,10 @@ function bindInput(onSubmit) {
 
 function answerInput() {
   const nonLatin = course().script && !course().specialChars.length;
-  return `<input id="answer" class="answer-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" dir="auto" lang="${esc(course().speechLang)}" aria-label="Votre réponse" />
-    ${nonLatin ? `<p class="muted small">Écrivez en ${esc(course().script)} ou en caractères latins (romanisation) : les deux sont acceptés.</p>` : ''}
+  return `<input id="answer" class="answer-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" dir="auto" lang="${esc(course().speechLang)}" aria-label="${esc(t('Votre réponse'))}" />
+    ${nonLatin ? `<p class="muted small">${t('Écrivez dans l’écriture de la langue ou en caractères latins (romanisation) : les deux sont acceptés.')}</p>` : ''}
     ${charsBar()}
-    <div class="row actions"><button class="btn primary" id="check">Vérifier</button><button class="btn ghost" id="skip">Je ne sais pas</button></div>`;
+    <div class="row actions"><button class="btn primary" id="check">${t('Vérifier')}</button><button class="btn ghost" id="skip">${t('Je ne sais pas')}</button></div>`;
 }
 
 function optionsHtml(ex) {
@@ -112,7 +113,7 @@ function optionsHtml(ex) {
 }
 
 function contextHtml(ex) {
-  if (!ex.context.length) return '<p class="muted small">C’est à vous de commencer la conversation.</p>';
+  if (!ex.context.length) return `<p class="muted small">${t('C’est à vous de commencer la conversation.')}</p>`;
   return `<ul class="dialogue context">${ex.context
     .map((l) => `<li class="${l.who}"><div class="bubble">${targetText(l.target, l.translit)} ${l.who === 'them' ? audioBtn(l.target) : ''}<span class="tr">${esc(l.fr)}</span></div></li>`)
     .join('')}</ul>`;
@@ -130,45 +131,45 @@ function renderExercise() {
   switch (ex.kind) {
     case 'intro':
       mood = 'wave';
-      body = `<p class="prompt-label">Nouveau</p>
+      body = `<p class="prompt-label">${t('Nouveau')}</p>
         <div class="row">${targetText(it.target, it.translit, { big: true })}${audioBtn(it.target)}</div>
         <p class="prompt">${esc(it.fr)}</p>
-        ${it.note ? `<div class="card grammar small"><span class="eyebrow">Note de Bao</span>${esc(it.note)}</div>` : ''}
-        <button class="btn primary block" id="next">J’ai compris</button>`;
+        ${it.note ? `<div class="card grammar small"><span class="eyebrow">${t('Note de Bao')}</span>${esc(it.note)}</div>` : ''}
+        <button class="btn primary block" id="next">${t('J’ai compris')}</button>`;
       break;
     case 'choice-target':
-      body = `<p class="prompt-label">Comment dit-on en ${esc(lang)} ?</p><p class="prompt">${esc(it.fr)}</p>${optionsHtml(ex)}`;
+      body = `<p class="prompt-label">${esc(t('Comment dit-on en {language} ?', { language: lang }))}</p><p class="prompt">${esc(it.fr)}</p>${optionsHtml(ex)}`;
       break;
     case 'choice-native':
-      body = `<p class="prompt-label">Que signifie…</p><div class="row prompt">${targetText(it.target, it.translit)}${audioBtn(it.target)}</div>${optionsHtml(ex)}`;
+      body = `<p class="prompt-label">${t('Que signifie…')}</p><div class="row prompt">${targetText(it.target, it.translit)}${audioBtn(it.target)}</div>${optionsHtml(ex)}`;
       break;
     case 'listen-choice':
       mood = 'listen';
-      body = `<p class="prompt-label">Écoutez et choisissez le sens</p>
-        <div class="row listen-row"><button class="btn audio-big" data-say="${esc(it.target)}" aria-label="Écouter">${icon('speaker', 32)}</button><button class="btn ghost" id="slow">Ralenti</button></div>
+      body = `<p class="prompt-label">${t('Écoutez et choisissez le sens')}</p>
+        <div class="row listen-row"><button class="btn audio-big" data-say="${esc(it.target)}" aria-label="${esc(t('Écouter'))}">${icon('speaker', 32)}</button><button class="btn ghost" id="slow">${t('Ralenti')}</button></div>
         ${optionsHtml(ex)}`;
       break;
     case 'write':
     case 'roleplay':
       mood = ex.kind === 'roleplay' ? 'listen' : 'think';
       body = `${ex.kind === 'roleplay' ? contextHtml(ex) : ''}
-        <p class="prompt-label">${ex.kind === 'roleplay' ? 'Votre réplique' : `Écrivez en ${esc(lang)}`}${ex.testOut ? ' — test de niveau' : ''}</p>
+        <p class="prompt-label">${ex.kind === 'roleplay' ? t('Votre réplique') : esc(t('Écrivez en {language}', { language: lang }))}${ex.testOut ? ` — ${t('test de niveau')}` : ''}</p>
         <p class="prompt">${esc(it.fr)}</p>
         ${answerInput()}`;
       break;
     case 'dictation':
       mood = 'listen';
-      body = `<p class="prompt-label">Écrivez ce que vous entendez</p>
-        <div class="row listen-row"><button class="btn audio-big" data-say="${esc(it.target)}" aria-label="Écouter">${icon('speaker', 32)}</button><button class="btn ghost" id="slow">Ralenti</button></div>
+      body = `<p class="prompt-label">${t('Écrivez ce que vous entendez')}</p>
+        <div class="row listen-row"><button class="btn audio-big" data-say="${esc(it.target)}" aria-label="${esc(t('Écouter'))}">${icon('speaker', 32)}</button><button class="btn ghost" id="slow">${t('Ralenti')}</button></div>
         ${answerInput()}`;
       break;
     case 'speak':
       mood = 'listen';
-      body = `<p class="prompt-label">Dites à voix haute</p>
+      body = `<p class="prompt-label">${t('Dites à voix haute')}</p>
         <div class="row">${targetText(it.target, it.translit, { big: true })}${audioBtn(it.target)}</div>
         <p class="muted">${esc(it.fr)}</p>
-        <div class="stack"><button class="btn primary block" id="mic">${icon('mic')} Appuyez puis parlez</button>
-        <button class="btn ghost block" id="no-mic">Je ne peux pas parler maintenant</button></div>`;
+        <div class="stack"><button class="btn primary block" id="mic">${icon('mic')} ${t('Appuyez puis parlez')}</button>
+        <button class="btn ghost block" id="no-mic">${t('Je ne peux pas parler maintenant')}</button></div>`;
       break;
   }
 
@@ -244,7 +245,7 @@ function answerChoice(ex, value) {
   });
   const status = ok ? 'correct' : 'wrong';
   record(ex, status);
-  showFeedback(ex, { status, message: ok ? 'Bien vu !' : `La bonne réponse était : « ${ex.answer} ».`, showTarget: true });
+  showFeedback(ex, { status, message: ok ? t('Bien vu !') : t('La bonne réponse était : « {answer} ».', { answer: ex.answer }), showTarget: true });
 }
 
 function answerText(ex, value) {
@@ -260,7 +261,7 @@ async function answerSpeak(ex) {
   if (S.phase !== 'question') return;
   const mic = $('#mic');
   mic.disabled = true;
-  mic.textContent = 'Je vous écoute…';
+  mic.textContent = t('Je vous écoute…');
   setMiniBao('listen');
   try {
     const heard = await recognize(course().speechLang);
@@ -271,14 +272,14 @@ async function answerSpeak(ex) {
     }
     if (best.status === 'wrong') {
       // La reconnaissance vocale se trompe aussi : pas de pénalité.
-      showFeedback(ex, { status: 'wrong', message: `J’ai entendu : « ${best.heard} ». Réessayez, ou continuez sans pénalité.`, showTarget: true, retrySpeak: true });
+      showFeedback(ex, { status: 'wrong', message: t('J’ai entendu : « {heard} ». Réessayez, ou continuez sans pénalité.', { heard: best.heard }), showTarget: true, retrySpeak: true });
       return;
     }
     record(ex, best.status);
-    showFeedback(ex, { ...best, message: `J’ai entendu : « ${best.heard} ». ${best.status === 'correct' ? 'Excellente prononciation !' : 'Presque, c’est compris.'}`, showTarget: false });
+    showFeedback(ex, { ...best, message: `${t('J’ai entendu : « {heard} ».', { heard: best.heard })} ${t(best.status === 'correct' ? 'Excellente prononciation !' : 'Presque, c’est compris.')}`, showTarget: false });
   } catch (err) {
     mic.disabled = false;
-    mic.innerHTML = `${icon('mic')} Appuyez puis parlez`;
+    mic.innerHTML = `${icon('mic')} ${t('Appuyez puis parlez')}`;
     setMiniBao('comfort');
     toast(err.message);
   }
@@ -288,20 +289,20 @@ function diffHtml(diff) {
   if (!diff) return '';
   return `<p class="diff small" dir="auto">${diff
     .map((op) => (op.type === 'same' ? esc(op.word) : op.type === 'missing' ? `<mark class="missing">${esc(op.word)}</mark>` : `<s class="extra">${esc(op.word)}</s>`))
-    .join(' ')}</p><p class="muted small">Surligné : ce qui manquait · barré : ce qui était en trop.</p>`;
+    .join(' ')}</p><p class="muted small">${t('Surligné : ce qui manquait · barré : ce qui était en trop.')}</p>`;
 }
 
 const FEEDBACK = {
-  correct: { title: ['Bravo !', 'Parfait !', 'Excellent !', 'Super !'], mood: 'cheer' },
-  almost: { title: ['Presque !'], mood: 'happy' },
-  wrong: { title: ['Pas tout à fait', 'On y est presque', 'Pas grave !'], mood: 'comfort' },
+  correct: { title: [N('Bravo !'), N('Parfait !'), N('Excellent !'), N('Super !')], mood: 'cheer' },
+  almost: { title: [N('Presque !')], mood: 'happy' },
+  wrong: { title: [N('Pas tout à fait'), N('On y est presque'), N('Pas grave !')], mood: 'comfort' },
 };
 
 function showFeedback(ex, r) {
   S.phase = 'feedback';
   const it = ex.item;
   const f = FEEDBACK[r.status];
-  const title = f.title[S.answers % f.title.length];
+  const title = t(f.title[S.answers % f.title.length]);
   const canContest = r.status === 'wrong' && r.given && r.given.trim() && !ex.options;
   setMiniBao(f.mood);
   const fb = $('#feedback');
@@ -314,14 +315,14 @@ function showFeedback(ex, r) {
         <p>${esc(r.message)}</p>
         ${r.showTarget || r.status !== 'correct' ? `<p>${targetText(r.expected ?? it.target, it.translit)} ${audioBtn(r.expected ?? it.target)}<br><span class="small">${esc(it.fr)}</span></p>` : ''}
         ${r.status === 'wrong' ? diffHtml(r.diff) : ''}
-        ${it.note && r.status !== 'correct' ? `<p class="note small"><span class="eyebrow">Note de Bao</span>${esc(it.note)}</p>` : ''}
-        ${r.status === 'wrong' && S.mode !== 'test' && S.mode !== 'role' && !r.retrySpeak ? '<p class="small muted">Pas de souci : cet élément reviendra un peu plus loin.</p>' : ''}
+        ${it.note && r.status !== 'correct' ? `<p class="note small"><span class="eyebrow">${t('Note de Bao')}</span>${esc(it.note)}</p>` : ''}
+        ${r.status === 'wrong' && S.mode !== 'test' && S.mode !== 'role' && !r.retrySpeak ? `<p class="small muted">${t('Pas de souci : cet élément reviendra un peu plus loin.')}</p>` : ''}
       </div>
     </div>
     <div class="row actions">
-      ${r.retrySpeak ? `<button class="btn" id="retry-speak">${icon('mic')} Réessayer</button>` : ''}
-      <button class="btn primary" id="continue">Continuer</button>
-      ${canContest ? '<button class="btn ghost" id="contest">Ma réponse était correcte</button>' : ''}
+      ${r.retrySpeak ? `<button class="btn" id="retry-speak">${icon('mic')} ${t('Réessayer')}</button>` : ''}
+      <button class="btn primary" id="continue">${t('Continuer')}</button>
+      ${canContest ? `<button class="btn ghost" id="contest">${t('Ma réponse était correcte')}</button>` : ''}
     </div>`;
   bindAudio(fb);
   if (r.status !== 'correct' || ex.kind === 'dictation' || ex.kind === 'roleplay') say(r.expected ?? it.target);
@@ -343,7 +344,7 @@ function contest(ex, given) {
   S.wrong = Math.max(0, S.wrong - 1);
   if (ex.testOut) S.testCorrect += 1;
   persist();
-  toast('Votre réponse est désormais acceptée.');
+  toast(t('Votre réponse est désormais acceptée.'));
   next();
 }
 
@@ -368,11 +369,11 @@ function renderSummary() {
       persist();
     }
     extra = passed
-      ? `<div class="feedback correct"><h3>Unité validée</h3><p>${s.testCorrect} / ${total} : les ${u.items.length} éléments sont marqués comme connus. Ils reviendront en révision dans 3 jours pour vérifier qu’ils sont bien ancrés.</p></div>`
-      : `<div class="feedback almost"><h3>Pas encore</h3><p>${s.testCorrect} / ${total}. Faites l’unité normalement : avec vos bases, ça ira vite.</p></div>`;
+      ? `<div class="feedback correct"><h3>${t('Unité validée')}</h3><p>${t('{score} / {total} : les {n} éléments sont marqués comme connus. Ils reviendront en révision dans 3 jours pour vérifier qu’ils sont bien ancrés.', { score: s.testCorrect, total, n: u.items.length })}</p></div>`
+      : `<div class="feedback almost"><h3>${t('Pas encore')}</h3><p>${t('{score} / {total}. Faites l’unité normalement : avec vos bases, ça ira vite.', { score: s.testCorrect, total })}</p></div>`;
   }
   if (s.mode === 'role') {
-    extra = `<section class="card"><h2>Le dialogue complet</h2><ul class="dialogue">${u.dialogue
+    extra = `<section class="card"><h2>${t('Le dialogue complet')}</h2><ul class="dialogue">${u.dialogue
       .map((l) => `<li class="${l.who}"><div class="bubble">${targetText(l.target, l.translit)} ${audioBtn(l.target)}<span class="tr">${esc(l.fr)}</span></div></li>`)
       .join('')}</ul></section>`;
   }
@@ -384,33 +385,33 @@ function renderSummary() {
   const mood = result.levelUp ? 'proud' : rate >= 80 ? 'cheer' : 'comfort';
   const [title, sub] =
     rate >= 90
-      ? ['Quelle session !', 'Bao est fier de vous.']
+      ? [t('Quelle session !'), t('Bao est fier de vous.')]
       : rate >= 60
-        ? ['Belle session !', 'Chaque erreur est une révision de plus, pas un échec.']
-        : ['Vous avez tenu bon !', 'C’était difficile : Bao a noté ce qu’il faut revoir.'];
+        ? [t('Belle session !'), t('Chaque erreur est une révision de plus, pas un échec.')]
+        : [t('Vous avez tenu bon !'), t('C’était difficile : Bao a noté ce qu’il faut revoir.')];
 
   app.innerHTML = `
     <section class="card summary-hero">
       ${bao(mood, 140)}
       <div>
-        <p class="eyebrow">Session terminée</p>
+        <p class="eyebrow">${t('Session terminée')}</p>
         <h1>${esc(title)}</h1>
         <p class="muted">${esc(sub)}</p>
         <div class="grid compact">
-          <div class="stat"><div class="num">${s.answers}</div><div class="label">réponses</div></div>
-          <div class="stat"><div class="num">${rate} %</div><div class="label">de réussite</div></div>
-          ${s.learned.size ? `<div class="stat"><div class="num">${s.learned.size}</div><div class="label">nouveautés</div></div>` : ''}
+          <div class="stat"><div class="num">${s.answers}</div><div class="label">${t('réponses')}</div></div>
+          <div class="stat"><div class="num">${rate} %</div><div class="label">${t('de réussite')}</div></div>
+          ${s.learned.size ? `<div class="stat"><div class="num">${s.learned.size}</div><div class="label">${t('nouveautés')}</div></div>` : ''}
         </div>
       </div>
     </section>
     ${rewardsHtml(result)}
     ${extra}
-    ${mistakes.length ? `<section class="card"><h2>À retravailler</h2><p class="muted small">Ces éléments reviendront plus tôt en révision. Les erreurs servent à ça.</p>
+    ${mistakes.length ? `<section class="card"><h2>${t('À retravailler')}</h2><p class="muted small">${t('Ces éléments reviendront plus tôt en révision. Les erreurs servent à ça.')}</p>
       <ul class="item-list">${mistakes.map((it) => `<li><span>${targetText(it.target, it.translit)} ${audioBtn(it.target)}<br><span class="muted small">${esc(it.fr)}</span></span></li>`).join('')}</ul></section>` : ''}
     <section class="card">${weekWidget()}</section>
     <div class="stack">
-      ${unitLeft ? `<a class="btn primary block" href="#/session/apprendre/${s.unitId}">Continuer l’unité</a>` : ''}
-      <a class="btn ${unitLeft ? '' : 'primary'} block" href="#/">Retour à l’accueil</a>
+      ${unitLeft ? `<a class="btn primary block" href="#/session/apprendre/${s.unitId}">${t('Continuer l’unité')}</a>` : ''}
+      <a class="btn ${unitLeft ? '' : 'primary'} block" href="#/">${t('Retour à l’accueil')}</a>
     </div>`;
   bindAudio();
   S = null;
@@ -424,10 +425,10 @@ export function celebrate(result, rate = 100) {
   const challenge = result.gains.find((g) => g.challenge);
   if (result.levelUp) {
     const lv = course().levels[Math.min(result.after.levelsDone, 5)];
-    reveal({ kind: 'level', eyebrow: 'Nouveau niveau', title: 'Bao a grandi !', text: `Vous passez au niveau ${lv.cefr} · ${lv.name}. Nouvelle tenue, nouveau ciel dans le jardin !`, bao: { mood: 'proud', stage: Math.min(5, result.after.levelsDone), equipped: state.rewards.equipped } });
+    reveal({ kind: 'level', eyebrow: t('Nouveau niveau'), title: t('Bao a grandi !'), text: t('Vous passez au niveau {level}. Nouvelle tenue, nouveau ciel dans le jardin !', { level: `${lv.cefr} · ${t(lv.name)}` }), bao: { mood: 'proud', stage: Math.min(5, result.after.levelsDone), equipped: state.rewards.equipped } });
   }
-  if (chest) reveal({ kind: 'chest', eyebrow: 'Objectif de la semaine', title: 'Le coffre de la semaine', amount: chest, text: 'Votre régularité paie. Bao est fier de vous !' });
-  if (challenge) reveal({ kind: 'gift', eyebrow: 'Défi du jour réussi', title: 'Un cadeau pour vous', amount: challenge.amount, color: 0x8fb0ff });
+  if (chest) reveal({ kind: 'chest', eyebrow: t('Objectif de la semaine'), title: t('Le coffre de la semaine'), amount: chest, text: t('Votre régularité paie. Bao est fier de vous !') });
+  if (challenge) reveal({ kind: 'gift', eyebrow: t('Défi du jour réussi'), title: t('Un cadeau pour vous'), amount: challenge.amount, color: 0x8fb0ff });
   if (!result.levelUp && !chest && !challenge && rate >= 80) confetti({ count: 90 });
 }
 

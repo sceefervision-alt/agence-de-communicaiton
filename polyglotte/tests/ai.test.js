@@ -76,3 +76,28 @@ test('professeur IA : historique nettoyé et limité', async () => {
   assert.equal(r.mood, 'wave');
   assert.equal(sent.history.length, 20);
 });
+
+test('validateUnit : phrases dans la langue de base (champ « base »), identifiants distincts', () => {
+  const raw = {
+    ...rawUnit,
+    items: rawUnit.items.map(({ fr, ...rest }) => ({ ...rest, base: `Sentence ${fr.split(' ')[1]}` })),
+    dialogue: rawUnit.dialogue.map(({ fr, ...rest }) => ({ ...rest, base: fr })),
+  };
+  const u = validateUnit(raw, { langId: 'ja', unitId: 'a1-1', base: 'en' });
+  assert.equal(u.items[0].fr, 'Sentence 0');
+  assert.equal(u.items[0].id, 'ja-a1-1~en-1');
+  assert.equal(u.dialogue[0].fr, 'Bonjour');
+});
+
+test('requestUnit et requestTutor transmettent la langue de base', async () => {
+  const bodies = [];
+  const fetchImpl = async (url, opts) => {
+    bodies.push(JSON.parse(opts.body));
+    return { ok: true, status: 200, json: async () => (url.includes('tutor') ? { reply: 'Hola', suggestions: [{ target: 'Sí', base: 'Yes' }] } : { unit: rawUnit }) };
+  };
+  await requestUnit({ language: { id: 'ja', name: 'Japonais' }, unitId: 'a1-1', base: 'en', endpoint: 'api/generate-unit', fetchImpl });
+  const reply = await requestTutor({ language: { id: 'es', name: 'Espagnol' }, base: 'en', levelId: 'a1', history: [], endpoint: 'api/tutor', fetchImpl });
+  assert.equal(bodies[0].base, 'en');
+  assert.equal(bodies[1].base, 'en');
+  assert.deepEqual(reply.suggestions, [{ target: 'Sí', fr: 'Yes' }]);
+});

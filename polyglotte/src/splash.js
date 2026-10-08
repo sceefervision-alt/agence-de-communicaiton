@@ -4,6 +4,7 @@
 
 import { load3D } from './visual.js';
 import { panda } from './panda.js';
+import { t } from './i18n.js';
 
 export function playSplash({ stage = 0, equipped = {} } = {}) {
   return new Promise((resolve) => {
@@ -14,9 +15,9 @@ export function playSplash({ stage = 0, equipped = {} } = {}) {
       <div class="splash-brand">
         <img src="icons/icon.svg" alt="" width="64" height="64" />
         <h1>Polyglotte</h1>
-        <p>Toutes les langues, du débutant au senior.<br>Pour les pros qui voyagent.</p>
+        <p>${t('Toutes les langues, du débutant au senior.')}<br>${t('Pour les pros qui voyagent.')}</p>
       </div>
-      <p class="splash-skip">Touchez pour commencer</p>`;
+      <p class="splash-skip">${t('Touchez pour commencer')}</p>`;
     document.body.append(overlay);
     document.body.classList.add('splashing');
 

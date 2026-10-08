@@ -7,6 +7,7 @@ import { findLanguage } from './languages.js';
 import { weeklyStatus, levelStatus, recalledCount, logActivity } from './progress.js';
 import { sessionEarnings, applyEarnings, newTrophies } from './rewards.js';
 import { panda } from './panda.js';
+import { t, tn, languageName, languageNameInline, uiLocale } from './i18n.js';
 import { baoSlot } from './visual.js';
 import { speak, canSpeak, canRecognize } from './speech.js';
 
@@ -26,7 +27,6 @@ const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ESC[c]);
 export const $ = (sel, root = app) => root.querySelector(sel);
 export const $$ = (sel, root = app) => [...root.querySelectorAll(sel)];
-export const plural = (n, one, many) => `${n} ${n > 1 ? many : one}`;
 
 export function toast(msg) {
   const el = document.createElement('div');
@@ -68,11 +68,16 @@ export function invalidateCourse() {
   courseCache = null;
 }
 
+// Langue de base de l'apprenant : interface, traductions, explications.
+export const base = () => state.settings.baseLang ?? 'fr';
+export const baseLanguage = () => findLanguage(base());
+
 export function course() {
   const sector = state.profile?.sector ?? null;
-  if (!courseCache || courseCache.id !== state.settings.course || courseCache.sector !== sector) {
-    const opts = { generated: state.generated, customLanguages: state.customLanguages, sector };
-    courseCache = { ...(buildCourse(state.settings.course, opts) ?? buildCourse('es', opts)), sector };
+  const b = base();
+  if (!courseCache || courseCache.id !== state.settings.course || courseCache.sector !== sector || courseCache.base !== b) {
+    const opts = { generated: state.generated, customLanguages: state.customLanguages, sector, base: b };
+    courseCache = { ...(buildCourse(state.settings.course, opts) ?? buildCourse(b === 'en' ? 'es' : 'en', opts)), sector };
   }
   return courseCache;
 }
@@ -82,7 +87,9 @@ export const cards = () => (state.cards[course().id] ??= {});
 export const custom = () => (state.custom[course().id] ??= []);
 export const extraAlts = () => (state.extraAlts[course().id] ??= {});
 export const items = () => allItems(course(), custom(), extraAlts());
-export const langName = () => course().name.toLowerCase();
+// Nom de la langue apprise : dans une phrase (« en espagnol ») ou en titre.
+export const langName = () => languageNameInline(currentLanguage());
+export const courseName = () => languageName(currentLanguage());
 export const caps = () => ({
   audio: state.settings.audio && canSpeak() && !!course().speechLang,
   speech: state.settings.speaking && canRecognize() && !!course().speechLang,
@@ -116,7 +123,7 @@ export function baoSays(mood, text, { size = 110, className = '' } = {}) {
 
 // ---------- Petits composants ----------
 
-export function audioBtn(text, label = 'Écouter') {
+export function audioBtn(text, label = t('Écouter')) {
   if (!caps().audio || !text) return '';
   return `<button class="btn ghost audio-btn" data-say="${esc(text)}" aria-label="${esc(label)}" title="${esc(label)}">${icon('speaker')}</button>`;
 }
@@ -130,18 +137,21 @@ export function targetText(text, translit, { big = false } = {}) {
   return `<span class="target ${big ? 'target-big' : ''}" dir="${dir}" lang="${esc(course().speechLang || '')}">${esc(text)}</span>${translit ? `<span class="translit">${esc(translit)}</span>` : ''}`;
 }
 
+// Initiale du jour de la semaine dans la langue de l'interface.
+const dayLabel = (key) => new Date(`${key}T12:00:00`).toLocaleDateString(uiLocale(), { weekday: 'narrow' });
+
 export function weekWidget() {
   const w = weeklyStatus(state.log, state.settings.weeklyGoal, Date.now());
   const left = Math.max(0, w.goal - w.active);
   return `
-    <div class="row spread"><h2>Objectif de la semaine</h2><span class="badge ${w.reached ? 'ok' : ''}">${w.active} / ${w.goal} jours</span></div>
-    <div class="week" aria-label="Jours actifs cette semaine">
-      ${w.days.map((d) => `<span class="day ${d.active ? 'active' : ''} ${d.today ? 'today' : ''} ${d.future ? 'future' : ''}" title="${d.key}">${d.label}</span>`).join('')}
+    <div class="row spread"><h2>${t('Objectif de la semaine')}</h2><span class="badge ${w.reached ? 'ok' : ''}">${t('{active} / {goal} jours', { active: w.active, goal: w.goal })}</span></div>
+    <div class="week" aria-label="${esc(t('Jours actifs cette semaine'))}">
+      ${w.days.map((d) => `<span class="day ${d.active ? 'active' : ''} ${d.today ? 'today' : ''} ${d.future ? 'future' : ''}" title="${d.key}">${esc(dayLabel(d.key))}</span>`).join('')}
     </div>
     <p class="muted small">${
       w.reached
-        ? 'Objectif atteint ! Le coffre surprise de la semaine est ouvert. Le reste, c’est du bonus — ou du repos bien mérité.'
-        : `Encore ${plural(left, 'jour', 'jours')} cette semaine pour ouvrir le coffre surprise. Les jours de repos ne vous font rien perdre.`
+        ? t('Objectif atteint ! Le coffre surprise de la semaine est ouvert. Le reste, c’est du bonus — ou du repos bien mérité.')
+        : tn(left, 'Encore {n} jour cette semaine pour ouvrir le coffre surprise. Les jours de repos ne vous font rien perdre.', 'Encore {n} jours cette semaine pour ouvrir le coffre surprise. Les jours de repos ne vous font rien perdre.')
     }</p>`;
 }
 
@@ -189,13 +199,13 @@ export function rewardsHtml({ gains, trophies, levelUp, after }) {
   const total = gains.reduce((a, g) => a + g.amount, 0);
   let html = '';
   if (total > 0) {
-    html += `<section class="card gains"><div class="row spread"><h2>Bonus gagnés</h2><span class="bamboo-pill big">${bambooIcon(20)} +${total}</span></div>
+    html += `<section class="card gains"><div class="row spread"><h2>${t('Bonus gagnés')}</h2><span class="bamboo-pill big">${bambooIcon(20)} +${total}</span></div>
       <ul class="gain-list">${gains.map((g) => `<li class="${g.chest ? 'chest' : ''}"><span>${esc(g.reason)}</span><strong>+${g.amount}</strong></li>`).join('')}</ul>
-      <p class="muted small">Dépensez vos bambous dans la boutique de Bao.</p></section>`;
+      <p class="muted small">${t('Dépensez vos bambous dans la boutique de Bao.')}</p></section>`;
   }
   if (trophies.length) {
-    html += `<section class="card"><h2>Trophée${trophies.length > 1 ? 's' : ''} débloqué${trophies.length > 1 ? 's' : ''}</h2>
-      <div class="trophies">${trophies.map((t) => `<div class="trophy got">${icon('sparkle', 22)}<strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join('')}</div></section>`;
+    html += `<section class="card"><h2>${tn(trophies.length, 'Trophée débloqué', 'Trophées débloqués')}</h2>
+      <div class="trophies">${trophies.map((tr) => `<div class="trophy got">${icon('sparkle', 22)}<strong>${esc(t(tr.name))}</strong><span>${esc(t(tr.desc))}</span></div>`).join('')}</div></section>`;
   }
   return html;
 }

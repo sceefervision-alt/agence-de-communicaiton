@@ -1,6 +1,8 @@
 // Audio : synthèse vocale (écoute, dictée) et reconnaissance vocale (oral).
 // Tout passe par les API du navigateur, sans service externe.
 
+import { t } from './i18n.js';
+
 export function canSpeak() {
   return typeof window !== 'undefined' && 'speechSynthesis' in window;
 }
@@ -40,7 +42,7 @@ export function stopSpeaking() {
 export function recognize(lang, { timeoutMs = 8000 } = {}) {
   return new Promise((resolve, reject) => {
     if (!canRecognize()) {
-      reject(new Error('Reconnaissance vocale indisponible dans ce navigateur.'));
+      reject(new Error(t('Reconnaissance vocale indisponible dans ce navigateur.')));
       return;
     }
     const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -62,11 +64,11 @@ export function recognize(lang, { timeoutMs = 8000 } = {}) {
     rec.onerror = (event) => {
       done = true;
       clearTimeout(timer);
-      reject(new Error(event.error === 'not-allowed' ? 'Micro non autorisé.' : "Je n'ai rien entendu."));
+      reject(new Error(t(event.error === 'not-allowed' ? 'Micro non autorisé.' : 'Je n’ai rien entendu.')));
     };
     rec.onend = () => {
       clearTimeout(timer);
-      if (!done) reject(new Error("Je n'ai rien entendu."));
+      if (!done) reject(new Error(t('Je n’ai rien entendu.')));
     };
     rec.start();
   });

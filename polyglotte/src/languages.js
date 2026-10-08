@@ -1,10 +1,13 @@
 // Catalogue des langues. Les langues marquées `curated` ont un niveau A1
-// écrit à la main (disponible hors ligne) ; tout le reste du programme est
-// généré par l'IA à la demande. N'importe quelle autre langue peut être
-// ajoutée par son nom (« Autre langue »).
+// écrit à la main pour les francophones (disponible hors ligne) ; tout le
+// reste du programme est généré par l'IA à la demande, dans la langue de base
+// de l'apprenant. N'importe quelle autre langue peut être ajoutée par son nom
+// (« Autre langue »). `name` est le nom français (usage interne et invites) ;
+// l'interface affiche le nom dans la langue de l'apprenant (voir i18n.js).
 
 export const LANGUAGES = [
   // Europe
+  { id: 'fr', name: 'Français', native: 'Français', speechLang: 'fr-FR', chars: 'à â ç é è ê ë î ï ô ù û ü œ' },
   { id: 'en', name: 'Anglais', native: 'English', speechLang: 'en-GB', curated: true },
   { id: 'es', name: 'Espagnol', native: 'Español', speechLang: 'es-ES', chars: 'á é í ó ú ñ ü ¿ ¡', curated: true },
   { id: 'de', name: 'Allemand', native: 'Deutsch', speechLang: 'de-DE', chars: 'ä ö ü ß', curated: true },
@@ -51,7 +54,7 @@ export const LANGUAGES = [
   { id: 'am', name: 'Amharique', native: 'አማርኛ', speechLang: 'am-ET', script: 'guèze' },
   { id: 'ht', name: 'Créole haïtien', native: 'Kreyòl ayisyen', speechLang: 'ht-HT', chars: 'è ò' },
   // Langues anciennes et construites
-  { id: 'la', name: 'Latin', native: 'Latina', speechLang: 'la' },
+  { id: 'la', name: 'Latin', native: 'Latina', speechLang: 'la', base: false },
   { id: 'eo', name: 'Espéranto', native: 'Esperanto', speechLang: 'eo', chars: 'ĉ ĝ ĥ ĵ ŝ ŭ' },
 ];
 

@@ -2,6 +2,7 @@
 // Le navigateur gère le micro et la voix ; le serveur interroge Claude.
 
 import { GeneratorUnavailable } from './generator.js';
+import { t } from './i18n.js';
 
 export const TUTOR_ENDPOINT = 'api/tutor';
 export const MAX_TURNS = 20; // historique envoyé au serveur
@@ -22,7 +23,7 @@ export function trimHistory(history) {
 
 export function validateTutorReply(raw) {
   const reply = clean(raw?.reply, 600);
-  if (!reply) throw new Error('Bao n’a pas su répondre. Réessayez.');
+  if (!reply) throw new Error(t('Bao n’a pas su répondre. Réessayez.'));
   const c = raw?.correction;
   const correction =
     c && clean(c.corrected) && clean(c.corrected) !== clean(c.original)
@@ -34,26 +35,26 @@ export function validateTutorReply(raw) {
     translation: clean(raw?.translation, 600),
     correction,
     suggestions: (Array.isArray(raw?.suggestions) ? raw.suggestions : [])
-      .map((s) => ({ target: clean(s?.target, 200), fr: clean(s?.fr, 200) }))
+      .map((s) => ({ target: clean(s?.target, 200), fr: clean(s?.base ?? s?.fr, 200) }))
       .filter((s) => s.target)
       .slice(0, 3),
     mood: MOODS.includes(raw?.mood) ? raw.mood : 'happy',
   };
 }
 
-export async function requestTutor({ language, levelId, unitId, history, profile = null, endpoint = TUTOR_ENDPOINT, fetchImpl = globalThis.fetch }) {
+export async function requestTutor({ language, base = 'fr', levelId, unitId, history, profile = null, endpoint = TUTOR_ENDPOINT, fetchImpl = globalThis.fetch }) {
   let res;
   try {
     res = await fetchImpl(endpoint, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ language: { id: language.id, name: language.name }, levelId, unitId, sector: profile?.sector ?? null, goal: profile?.goal ?? null, history: trimHistory(history) }),
+      body: JSON.stringify({ language: { id: language.id, name: language.name }, base, levelId, unitId, sector: profile?.sector ?? null, goal: profile?.goal ?? null, history: trimHistory(history) }),
     });
   } catch {
-    throw new Error('Connexion impossible. Vérifiez votre accès à Internet.');
+    throw new Error(t('Connexion impossible. Vérifiez votre accès à Internet.'));
   }
   if (res.status === 404 || res.status === 405 || res.status === 501) {
-    throw new GeneratorUnavailable('Le professeur IA n’est pas activé sur ce serveur.');
+    throw new GeneratorUnavailable(t('Le professeur IA n’est pas activé sur ce serveur.'));
   }
   let data = null;
   try {
@@ -62,8 +63,8 @@ export async function requestTutor({ language, levelId, unitId, history, profile
     /* corps vide */
   }
   if (res.status === 503 && data?.error === 'not-configured') {
-    throw new GeneratorUnavailable('Le professeur IA n’est pas encore configuré (clé d’API manquante).');
+    throw new GeneratorUnavailable(t('Le professeur IA n’est pas encore configuré (clé d’API manquante).'));
   }
-  if (!res.ok) throw new Error(data?.message || 'Bao n’a pas pu répondre. Réessayez dans un instant.');
+  if (!res.ok) throw new Error(t(data?.message || 'Bao n’a pas pu répondre. Réessayez dans un instant.'));
   return validateTutorReply(data);
 }

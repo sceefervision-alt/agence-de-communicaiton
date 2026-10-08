@@ -2,6 +2,7 @@
 // et peut être exportée / importée en JSON.
 
 import { defaultRewards } from './rewards.js';
+import { t } from './i18n.js';
 
 const KEY = 'polyglotte:v1';
 
@@ -74,7 +75,7 @@ export function exportJSON(state) {
 export function importJSON(text) {
   const raw = JSON.parse(text);
   if (!raw || raw.version !== 1 || typeof raw.cards !== 'object') {
-    throw new Error("Ce fichier n'est pas une sauvegarde Polyglotte valide.");
+    throw new Error(t('Ce fichier n’est pas une sauvegarde Polyglotte valide.'));
   }
   const { exportedAt, ...rest } = raw;
   return mergeState(rest);

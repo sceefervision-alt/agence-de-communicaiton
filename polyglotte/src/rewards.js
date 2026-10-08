@@ -4,6 +4,7 @@
 // ne se perd : pas de pénalité, pas de série à protéger.
 
 import { dateKey, startOfWeek } from './progress.js';
+import { t, tn } from './i18n.js';
 
 export const REWARD = {
   recalled: 1, // par élément qui atteint le rappel actif
@@ -94,23 +95,23 @@ export function defaultRewards() {
 export function sessionEarnings({ before, after, summary, weeklyReached, rewards, langId, now = Date.now() }) {
   const gains = [];
   const recalled = after.recalled - before.recalled;
-  if (recalled > 0) gains.push({ amount: recalled * REWARD.recalled, reason: `${recalled} élément${recalled > 1 ? 's' : ''} ancré${recalled > 1 ? 's' : ''} en mémoire` });
+  if (recalled > 0) gains.push({ amount: recalled * REWARD.recalled, reason: tn(recalled, '{n} élément ancré en mémoire', '{n} éléments ancrés en mémoire') });
   const units = after.units - before.units;
-  if (units > 0) gains.push({ amount: units * REWARD.unit, reason: `${units} compétence${units > 1 ? 's' : ''} « Je peux… » validée${units > 1 ? 's' : ''}` });
+  if (units > 0) gains.push({ amount: units * REWARD.unit, reason: tn(units, '{n} compétence « Je peux… » validée', '{n} compétences « Je peux… » validées') });
   const levelsAlready = rewards.levelsRewarded[langId] ?? 0;
   if (after.levelsDone > levelsAlready) {
     const n = after.levelsDone - levelsAlready;
-    gains.push({ amount: n * REWARD.level, reason: 'Niveau terminé !', levelUp: true });
+    gains.push({ amount: n * REWARD.level, reason: t('Niveau terminé !'), levelUp: true });
   }
   const wk = weekKey(now);
   if (weeklyReached && !rewards.weeksRewarded.includes(wk)) {
     const chest = 5 + (hash(wk) % 11); // coffre surprise : 5 à 15 bambous
-    gains.push({ amount: REWARD.weekly, reason: 'Objectif de la semaine atteint', weekly: true });
-    gains.push({ amount: chest, reason: 'Coffre surprise de la semaine', chest: true });
+    gains.push({ amount: REWARD.weekly, reason: t('Objectif de la semaine atteint'), weekly: true });
+    gains.push({ amount: chest, reason: t('Coffre surprise de la semaine'), chest: true });
   }
   const ch = dailyChallenge(now);
   const dk = dateKey(now);
-  if (!rewards.challenges[dk] && ch.test(summary)) gains.push({ amount: REWARD.challenge, reason: `Défi du jour : ${ch.text.toLowerCase()}`, challenge: true });
+  if (!rewards.challenges[dk] && ch.test(summary)) gains.push({ amount: REWARD.challenge, reason: t('Défi du jour : {challenge}', { challenge: t(ch.text) }), challenge: true });
   return gains;
 }
 
@@ -135,9 +136,9 @@ export function newTrophies(rewards, context, now = Date.now()) {
 
 export function buy(rewards, itemId) {
   const item = SHOP.find((i) => i.id === itemId);
-  if (!item) throw new Error('Objet inconnu.');
-  if (rewards.owned.includes(itemId)) throw new Error('Bao a déjà cet objet.');
-  if (rewards.bamboo < item.cost) throw new Error('Pas encore assez de bambous.');
+  if (!item) throw new Error(t('Objet inconnu.'));
+  if (rewards.owned.includes(itemId)) throw new Error(t('Bao a déjà cet objet.'));
+  if (rewards.bamboo < item.cost) throw new Error(t('Pas encore assez de bambous.'));
   const r = structuredClone(rewards);
   r.bamboo -= item.cost;
   r.owned.push(itemId);

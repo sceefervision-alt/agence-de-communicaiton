@@ -2,6 +2,8 @@
 // Là où Duolingo affiche souvent un simple « Mauvaise réponse », on explique
 // ce qui ne va pas : accent, faute de frappe, ordre des mots, mot manquant…
 
+import { t } from './i18n.js';
+
 const EN_CONTRACTIONS = {
   "i'm": 'i am', "you're": 'you are', "we're": 'we are', "they're": 'they are',
   "he's": 'he is', "she's": 'she is', "it's": 'it is', "that's": 'that is',
@@ -178,28 +180,29 @@ export function checkAnswer(input, accepted, { lang, strictAccents = false } = {
 }
 
 export function describe(result) {
-  if (result.status === 'correct') return 'Parfait !';
+  if (result.status === 'correct') return t('Parfait !');
   const parts = result.issues.map((issue) => {
+    const vars = { expected: issue.expected, got: issue.got ?? '…' };
     switch (issue.type) {
       case 'accent':
-        return `Attention à l'accent : « ${issue.expected} » (et non « ${issue.got ?? '…'} »).`;
+        return t('Attention à l’accent : « {expected} » (et non « {got} »).', vars);
       case 'typo':
-        return `Petite faute de frappe : « ${issue.expected} » (vous avez écrit « ${issue.got} »).`;
+        return t('Petite faute de frappe : « {expected} » (vous avez écrit « {got} »).', vars);
       case 'article':
-        return `Mauvais article : « ${issue.expected} » et non « ${issue.got} ». Vérifiez le genre ou le nombre du nom.`;
+        return t('Mauvais article : « {expected} » et non « {got} ». Vérifiez le genre ou le nombre du nom.', vars);
       case 'order':
-        return "Tous les mots sont là, mais pas dans le bon ordre.";
+        return t('Tous les mots sont là, mais pas dans le bon ordre.');
       case 'missing':
-        return `Il manque un mot : « ${issue.expected} ».`;
+        return t('Il manque un mot : « {expected} ».', vars);
       case 'extra':
-        return `Un mot est en trop : « ${issue.got} ».`;
+        return t('Un mot est en trop : « {got} ».', vars);
       case 'empty':
-        return "Vous n'avez rien écrit.";
+        return t('Vous n’avez rien écrit.');
       default:
-        return 'Ce n’est pas tout à fait ça. Comparez avec la bonne réponse ci-dessous.';
+        return t('Ce n’est pas tout à fait ça. Comparez avec la bonne réponse ci-dessous.');
     }
   });
-  if (result.status === 'almost') parts.push('Réponse acceptée.');
+  if (result.status === 'almost') parts.push(t('Réponse acceptée.'));
   return parts.join(' ');
 }
 

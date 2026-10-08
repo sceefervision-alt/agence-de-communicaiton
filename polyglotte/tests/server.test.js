@@ -60,3 +60,35 @@ test('une leçon déjà générée est servie depuis le cache, même sans clé',
   assert.equal(r.status, 200);
   assert.equal((await r.json()).cached, true);
 });
+
+test('langue de base : validée, et rangée à part dans le cache', async () => {
+  assert.equal((await post('/api/generate-unit', { language: { id: 'es' }, unitId: 'a1-1', base: 'klingon' })).status, 400);
+  assert.equal((await post('/api/generate-unit', { language: { id: 'en' }, unitId: 'a1-1', base: 'en' })).status, 400);
+  assert.equal((await post('/api/tutor', { language: { id: 'es' }, base: 'la', history: [] })).status, 400);
+  const unit = { id: 'a1-1', grammar: { title: 'Greetings', body: ['b'] }, items: [], dialogue: [], fact: null };
+  await mkdir(path.join(cacheDir, 'units', 'ja'), { recursive: true });
+  await writeFile(path.join(cacheDir, 'units', 'ja', 'a1-1~en.json'), JSON.stringify(unit));
+  const en = await post('/api/generate-unit', { language: { id: 'ja', name: 'Japonais' }, unitId: 'a1-1', base: 'en' });
+  assert.equal((await en.json()).unit.grammar.title, 'Greetings');
+  // Le cache anglais ne sert pas aux francophones.
+  assert.equal((await post('/api/generate-unit', { language: { id: 'ja', name: 'Japonais' }, unitId: 'a1-1', base: 'fr' })).status, 503);
+});
+
+test('interface traduite : français et anglais sans IA, autres langues depuis le cache', async () => {
+  const { CATALOG, CATALOG_VERSION } = await import('../src/i18n.js');
+  const en = await (await fetch(`${base}/api/ui/en`)).json();
+  assert.equal(en.strings.Réglages, 'Settings');
+  assert.equal(Object.keys(en.strings).length, CATALOG.length);
+  assert.equal((await fetch(`${base}/api/ui/es`)).status, 503);
+  assert.equal((await fetch(`${base}/api/ui/la`)).status, 400);
+  assert.equal((await fetch(`${base}/api/ui/..%2f..%2fetc`)).status, 404);
+  await mkdir(path.join(cacheDir, 'ui'), { recursive: true });
+  await writeFile(path.join(cacheDir, 'ui', `es-${CATALOG_VERSION}.json`), JSON.stringify({ Réglages: 'Ajustes' }));
+  assert.equal((await (await fetch(`${base}/api/ui/es`)).json()).strings.Réglages, 'Ajustes');
+});
+
+test('pays de connexion lu dans les en-têtes de l’hébergeur', async () => {
+  assert.deepEqual(await (await fetch(`${base}/api/geo`)).json(), { country: null });
+  assert.deepEqual(await (await fetch(`${base}/api/geo`, { headers: { 'cf-ipcountry': 'ci' } })).json(), { country: 'CI' });
+  assert.deepEqual(await (await fetch(`${base}/api/geo`, { headers: { 'cf-ipcountry': 'XX' } })).json(), { country: null });
+});
