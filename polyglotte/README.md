@@ -13,7 +13,8 @@ Une application web pour apprendre **n'importe quelle langue**, du niveau **déb
   - **Pro & voyages** : aéroport, hôtel en déplacement, se présenter au travail, téléphone, salons, e-mails, dîners d'affaires, visioconférence, contrats, négociation, conférence…
   - **Mon métier** : le vocabulaire du secteur choisi par l'apprenant (16 secteurs : tech, santé, finance, commerce, industrie, juridique…).
 - **Accueil personnalisé** : à la première ouverture, Bao demande la langue, le secteur professionnel et l'objectif de l'apprenant. Le secteur personnalise les leçons « Mon métier » et les conversations.
-- **Leçons écrites à la main** pour les francophones, niveau A1 (vie quotidienne et Pro & voyages), en anglais, espagnol, allemand, italien et portugais. Elles fonctionnent hors ligne.
+- **Leçons écrites à la main** pour les francophones (vie quotidienne et Pro & voyages) : niveaux A1, A2 et B1 en anglais, espagnol et portugais du Brésil ; niveau A1 en allemand et italien. Elles fonctionnent hors ligne et sans IA.
+- **Conversation guidée avec Bao, sans IA** : dans la version gratuite (ou sans clé d'API), Bao joue le dialogue de la leçon, comprend les réponses libres proches de l'attendu, corrige et souffle des idées.
 - **Leçons générées par l'IA** pour tout le reste, rédigées dans la langue de base de l'apprenant. La langue, le niveau et la langue de base sont imposés par le programme, puis le contenu est vérifié automatiquement. Une fois générée, une leçon est mise en cache et partagée par tous les apprenants de même langue de base.
 - **Bao, professeur IA à l'oral** : on parle au micro (ou on écrit) dans la langue apprise. Bao répond à voix haute, corrige avec bienveillance (« Plus naturel : … ») et propose des idées de réponse. Un mode **mains libres** permet de converser sans toucher l'écran.
 - **3D façon dessin animé (cel-shading)** : Bao, son jardin, les coffres et les cadeaux sont en 3D temps réel (Three.js), avec un ombrage en aplats et des contours encrés, comme dans les jeux Naruto Storm ou les animations de Duolingo. Bao respire, cligne des yeux, suit le curseur du regard et sautille quand on le touche.
@@ -120,7 +121,8 @@ polyglotte/
 │   ├── session.js       # construction des sessions
 │   ├── progress.js      # objectif hebdomadaire, niveaux, statistiques
 │   ├── storage.js, speech.js
-│   └── data/            # A1 écrit à la main : es, en, de, it, pt (+ pro-a1.js)
+│   ├── scripted-tutor.js # conversation guidée avec Bao, sans IA
+│   └── data/            # écrit à la main : A1 (es, en, de, it, pt), A2-B1 (en, es, pt)
 ├── scripts/i18n-keys.mjs # liste les phrases de l'interface sans traduction anglaise
 ├── vendor/three.js      # Three.js embarqué (npm run build:vendor)
 ├── tests/               # tests (node --test)

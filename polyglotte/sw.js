@@ -1,5 +1,5 @@
 // Service worker : l'application fonctionne entièrement hors ligne.
-const CACHE = 'polyglotte-v6';
+const CACHE = 'polyglotte-v7';
 const FILES = [
   './',
   'index.html',
@@ -31,6 +31,10 @@ const FILES = [
   'src/data/it.js',
   'src/data/pt.js',
   'src/data/pro-a1.js',
+  'src/data/en-a2-b1.js',
+  'src/data/es-a2-b1.js',
+  'src/data/pt-a2-b1.js',
+  'src/scripted-tutor.js',
   'src/visual.js',
   'src/confetti.js',
   'src/reveal.js',

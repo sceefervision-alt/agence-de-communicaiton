@@ -53,3 +53,19 @@ test('le dialogue va jusqu’au bout', () => {
 test('pas de conversation guidée sans dialogue prêt', () => {
   assert.equal(canConverse(buildCourse('ja').units[0]), false);
 });
+
+test('toutes les leçons écrites à la main se jouent en conversation guidée', async () => {
+  const { CURATED } = await import('../src/data/index.js');
+  for (const langId of Object.keys(CURATED)) {
+    for (const u of buildCourse(langId).units.filter(canConverse)) {
+      const bao = createScriptedTutor({ unit: u, lang: langId });
+      let reply = bao.start();
+      let turns = 0;
+      while (!reply.done && turns++ < 12) {
+        reply = bao.respond(reply.suggestions[0].target);
+        assert.notEqual(reply.accepted, false, `${langId} ${u.id} : réplique attendue refusée`);
+      }
+      assert.equal(reply.done, true, `${langId} ${u.id}`);
+    }
+  }
+});
