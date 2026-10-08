@@ -17,7 +17,6 @@ import { renderWelcome } from './onboarding.js';
 import { playSplash } from './splash.js';
 import { load3D } from './visual.js';
 import { startSky, renderSky } from './sky.js';
-import { STATIC } from './env.js';
 import { SECTORS, GOALS, TRACKS, trackOf, levelThreshold, findSector } from './curriculum.js';
 
 // ---------- Routeur ----------
@@ -611,6 +610,7 @@ router();
 load3D();
 playSplash({ stage: stage(), equipped: state.rewards.equipped });
 
-if ('serviceWorker' in navigator && location.protocol !== 'file:' && !STATIC) {
+// Hors ligne grâce au service worker, sauf dans un aperçu intégré qui l'interdit.
+if ('serviceWorker' in navigator && location.protocol !== 'file:' && !globalThis.POLYGLOTTE_NO_SW) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
