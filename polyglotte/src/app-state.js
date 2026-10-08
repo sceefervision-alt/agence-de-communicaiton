@@ -98,7 +98,10 @@ export const caps = () => ({
   audio: state.settings.audio && canSpeak() && !!course().speechLang,
   speech: state.settings.speaking && canRecognize() && !!course().speechLang,
 });
-export const say = (text, rate) => (caps().audio ? speak(text, course().speechLang, rate ? { rate } : undefined) : Promise.resolve());
+// Voix choisie dans les réglages pour la langue apprise (sinon : automatique).
+export const chosenVoice = () => state.settings.voices?.[course().speechLang] ?? null;
+export const say = (text, rate, opts = {}) =>
+  caps().audio ? speak(text, course().speechLang, { voice: chosenVoice(), ...(rate ? { rate } : {}), ...opts }) : Promise.resolve();
 
 export const level = () => levelStatus(course(), cards());
 export const stage = () => Math.min(5, level().levelsDone);
@@ -127,13 +130,13 @@ export function baoSays(mood, text, { size = 110, className = '' } = {}) {
 
 // ---------- Petits composants ----------
 
-export function audioBtn(text, label = t('Écouter')) {
+export function audioBtn(text, label = t('Écouter'), { second = false } = {}) {
   if (!caps().audio || !text) return '';
-  return `<button class="btn ghost audio-btn" data-say="${esc(text)}" aria-label="${esc(label)}" title="${esc(label)}">${icon('speaker')}</button>`;
+  return `<button class="btn ghost audio-btn" data-say="${esc(text)}"${second ? ' data-second' : ''} aria-label="${esc(label)}" title="${esc(label)}">${icon('speaker')}</button>`;
 }
 
 export function bindAudio(root = app) {
-  $$('[data-say]', root).forEach((b) => b.addEventListener('click', () => say(b.dataset.say)));
+  $$('[data-say]', root).forEach((b) => b.addEventListener('click', () => say(b.dataset.say, null, { second: 'second' in b.dataset })));
 }
 
 export function targetText(text, translit, { big = false } = {}) {

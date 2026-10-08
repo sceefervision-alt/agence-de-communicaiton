@@ -83,7 +83,7 @@ npm test                        # tests (Node ≥ 20)
 
 **3D** : Three.js est embarqué dans `vendor/three.js` (191 Ko compressé), donc aucune connexion à un CDN n'est nécessaire. Pour le regénérer : `npm run build:vendor`. Sans WebGL, l'application affiche automatiquement les versions 2D de Bao et du jardin. Un seul contexte WebGL dessine toutes les scènes, et celles qui sont hors écran sont mises en pause. Le mode « réduire les animations » du système est respecté.
 
-**Audio** : la voix de Bao et la dictée utilisent la synthèse vocale du navigateur. Le micro (exercices oraux, conversation) utilise la reconnaissance vocale, disponible dans Chrome et Edge. Sans elle, la conversation se fait à l'écrit.
+**Audio** : la voix de Bao et la dictée utilisent la synthèse vocale du navigateur. L'application choisit d'elle-même la voix féminine la plus naturelle de l'appareil (voix neuronales « Natural », « Online », « améliorées »…, voix robotiques écartées), lit les dialogues avec deux voix différentes et repasse sur une voix de l'appareil si la voix en ligne est hors d'atteinte. La voix reste modifiable dans les réglages. Le micro (exercices oraux, conversation) utilise la reconnaissance vocale, disponible dans Chrome et Edge. Sans elle, la conversation se fait à l'écrit.
 
 ## Structure
 

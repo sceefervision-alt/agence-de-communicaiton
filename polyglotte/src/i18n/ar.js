@@ -597,4 +597,8 @@ export default {
   'Accueil': 'الرئيسية',
   'Converser': 'تحدّث',
   'Bambous': 'الخيزران',
+  'Voix': 'الصوت',
+  'Automatique : la voix féminine la plus naturelle': 'تلقائي: الصوت النسائي الأكثر طبيعية',
+  'Écouter un exemple': 'استمع إلى مثال',
+  'Pour une voix encore plus humaine : Edge propose des voix « Natural », et iPhone ou Mac des voix « améliorées » à installer dans les réglages d’accessibilité.': 'لصوت أكثر إنسانية: يقدّم Edge أصوات «Natural»، ويقدّم iPhone أو Mac أصواتًا «محسّنة» يمكن تثبيتها من إعدادات تسهيلات الاستخدام.',
 };

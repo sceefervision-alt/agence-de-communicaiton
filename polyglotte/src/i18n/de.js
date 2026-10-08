@@ -597,4 +597,8 @@ export default {
   'Accueil': 'Start',
   'Converser': 'Sprechen',
   'Bambous': 'Bambus',
+  'Voix': 'Stimme',
+  'Automatique : la voix féminine la plus naturelle': 'Automatisch: die natürlichste weibliche Stimme',
+  'Écouter un exemple': 'Beispiel anhören',
+  'Pour une voix encore plus humaine : Edge propose des voix « Natural », et iPhone ou Mac des voix « améliorées » à installer dans les réglages d’accessibilité.': 'Für eine noch menschlichere Stimme: Edge bietet „Natural“-Stimmen, iPhone und Mac „erweiterte“ Stimmen, die du in den Bedienungshilfen installieren kannst.',
 };

@@ -3,10 +3,10 @@ import { LANGUAGES, customLanguage } from './languages.js';
 import { requestUnit, GeneratorUnavailable } from './generator.js';
 import { weeklyStatus, courseStats, unitProgress, dateKey } from './progress.js';
 import { dailyChallenge } from './rewards.js';
-import { canSpeak, canRecognize, speak } from './speech.js';
+import { canSpeak, canRecognize, listVoices } from './speech.js';
 import {
   state, app, persist, replaceState, invalidateCourse, esc, $, $$, toast, icon, bambooIcon, course, cards, custom, items,
-  langName, courseName, base, baseLanguage, caps, bao, baoSays, level, stage, audioBtn, bindAudio, targetText, weekWidget, updateBambooCounter,
+  langName, courseName, base, baseLanguage, caps, bao, baoSays, level, stage, audioBtn, bindAudio, targetText, weekWidget, updateBambooCounter, say, chosenVoice,
 } from './app-state.js';
 import { t, tn, languageName, languageNameInline, uiLocale } from './i18n.js';
 import { initLocale, setBase, refreshUi, baseSelect } from './base-language.js';
@@ -335,7 +335,7 @@ function renderUnit(unitId) {
     <section class="card">
       <div class="row spread"><h2>${t('En situation')}</h2><button class="btn ghost" id="toggle-tr">${t('Masquer la traduction')}</button></div>
       <ul class="dialogue">
-        ${u.dialogue.map((l) => `<li class="${l.who}"><div class="bubble">${targetText(l.target, l.translit)} ${audioBtn(l.target)}<span class="tr">${esc(l.fr)}</span></div></li>`).join('')}
+        ${u.dialogue.map((l) => `<li class="${l.who}"><div class="bubble">${targetText(l.target, l.translit)} ${audioBtn(l.target, undefined, { second: l.who === 'you' })}<span class="tr">${esc(l.fr)}</span></div></li>`).join('')}
       </ul>
       ${caps().audio ? `<button class="btn" id="play-all">${icon('play', 16)} ${t('Écouter tout le dialogue')}</button>` : ''}
     </section>
@@ -368,7 +368,8 @@ function renderUnit(unitId) {
   $('#play-all')?.addEventListener('click', async () => {
     for (const l of u.dialogue) {
       if (location.hash !== `#/unite/${u.id}`) break;
-      await speak(l.target, course().speechLang);
+      // Deux voix différentes : on entend qui parle.
+      await say(l.target, null, { second: l.who === 'you' });
     }
   });
 }
@@ -500,6 +501,10 @@ function renderSettings() {
       </label>
       <label class="check"><input type="checkbox" name="audio" ${s.audio ? 'checked' : ''} ${canSpeak() ? '' : 'disabled'} />
         <span>${t('Audio (écoute, dictée et voix de Bao)')}${canSpeak() ? '' : ` — ${t('non disponible dans ce navigateur')}`}</span></label>
+      ${caps().audio ? `<div class="field voice-pick"><span>${t('Voix')}</span>
+        <div class="row"><select name="voice"><option value="">${t('Automatique : la voix féminine la plus naturelle')}</option></select>
+        <button type="button" class="btn ghost" id="voice-test">${icon('speaker')} ${t('Écouter un exemple')}</button></div>
+        <span class="small muted">${t('Pour une voix encore plus humaine : Edge propose des voix « Natural », et iPhone ou Mac des voix « améliorées » à installer dans les réglages d’accessibilité.')}</span></div>` : ''}
       <label class="check"><input type="checkbox" name="speaking" ${s.speaking ? 'checked' : ''} ${canRecognize() ? '' : 'disabled'} />
         <span>${t('Micro (exercices oraux et conversation avec Bao)')}${canRecognize() ? '' : ` — ${t('non disponible dans ce navigateur (essayez Chrome ou Edge)')}`}</span></label>
       <label class="check"><input type="checkbox" name="strictAccents" ${s.strictAccents ? 'checked' : ''} />
@@ -516,8 +521,24 @@ function renderSettings() {
       </div>
     </section>`;
 
+  const voiceSelect = $('select[name="voice"]');
+  if (voiceSelect) {
+    listVoices(course().speechLang).then((voices) => {
+      voiceSelect.insertAdjacentHTML('beforeend', voices.map((v) => `<option value="${esc(v.voiceURI)}" ${v.voiceURI === chosenVoice() ? 'selected' : ''}>${esc(v.name)}</option>`).join(''));
+    });
+    $('#voice-test').addEventListener('click', () => {
+      const sample = course().units.flatMap((u) => u.dialogue ?? []).find((l) => l.who === 'them')?.target ?? items()[0]?.target;
+      say(sample);
+    });
+  }
   $('#settings').addEventListener('change', (e) => {
     const el = e.target;
+    if (el.name === 'voice') {
+      s.voices = { ...(s.voices ?? {}), [course().speechLang]: el.value || null };
+      persist();
+      toast(t('Réglage enregistré.'));
+      return;
+    }
     if (el.name === 'baseLang') {
       setBase(el.value).then(() => {
         toast(t('Réglage enregistré.'));
