@@ -1,0 +1,14 @@
+{
+  "name": "Polyglotte",
+  "short_name": "Polyglotte",
+  "description": "Apprendre une langue avec le rappel actif et la répétition espacée, sans vies ni pression.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ee",
+  "theme_color": "#1f6f5c",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

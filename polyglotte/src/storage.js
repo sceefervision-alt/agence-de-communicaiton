@@ -1,0 +1,67 @@
+// Stockage local : pas de compte, pas de serveur. La progression appartient à
+// l'utilisateur et peut être exportée / importée en JSON.
+
+const KEY = 'polyglotte:v1';
+
+export function defaultState() {
+  return {
+    version: 1,
+    settings: {
+      course: 'es',
+      newPerSession: 5,
+      weeklyGoal: 4,
+      strictAccents: false,
+      audio: true,
+      speaking: true,
+    },
+    cards: {}, // { [courseId]: { [itemId]: carte } }
+    custom: {}, // { [courseId]: [{ id, fr, target, alts }] }
+    extraAlts: {}, // { [courseId]: { [itemId]: [réponses acceptées par l'utilisateur] } }
+    log: { days: {} },
+  };
+}
+
+export function mergeState(raw) {
+  const base = defaultState();
+  if (!raw || typeof raw !== 'object' || raw.version !== 1) return base;
+  return {
+    ...base,
+    ...raw,
+    settings: { ...base.settings, ...(raw.settings ?? {}) },
+    cards: raw.cards ?? {},
+    custom: raw.custom ?? {},
+    extraAlts: raw.extraAlts ?? {},
+    log: { days: raw.log?.days ?? {} },
+  };
+}
+
+export function load(storage = globalThis.localStorage) {
+  try {
+    const text = storage?.getItem(KEY);
+    return mergeState(text ? JSON.parse(text) : null);
+  } catch {
+    return defaultState();
+  }
+}
+
+export function save(state, storage = globalThis.localStorage) {
+  try {
+    storage?.setItem(KEY, JSON.stringify(state));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function exportJSON(state) {
+  return JSON.stringify({ ...state, exportedAt: new Date().toISOString() }, null, 2);
+}
+
+export function importJSON(text) {
+  const raw = JSON.parse(text);
+  if (!raw || raw.version !== 1 || typeof raw.cards !== 'object') {
+    throw new Error("Ce fichier n'est pas une sauvegarde Polyglotte valide.");
+  }
+  const { exportedAt, ...rest } = raw;
+  return mergeState(rest);
+}

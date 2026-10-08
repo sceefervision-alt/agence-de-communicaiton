@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Polyglotte</title>
+    <meta name="description" content="Apprendre une langue avec le rappel actif, la répétition espacée et des corrections expliquées. Sans vies, sans pression, sans compte." />
+    <meta name="theme-color" content="#1f6f5c" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#/">
+        <img src="icons/icon.svg" alt="" width="28" height="28" />
+        <span>Polyglotte</span>
+      </a>
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="#/" data-nav="home">Accueil</a>
+        <a href="#/parcours" data-nav="parcours">Parcours</a>
+        <a href="#/vocabulaire" data-nav="vocabulaire">Mon vocabulaire</a>
+        <a href="#/reglages" data-nav="reglages">Réglages</a>
+      </nav>
+    </header>
+    <main id="app" tabindex="-1"></main>
+    <noscript>Polyglotte a besoin de JavaScript pour fonctionner.</noscript>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
