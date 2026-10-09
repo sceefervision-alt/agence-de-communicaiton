@@ -1,5 +1,4 @@
-// À remplacer par l'adresse e-mail réelle de ConsultIng.
-const CONTACT_EMAIL = "contact@votredomaine.com";
+const CONTACT_EMAIL = "zaraada23@gmail.com";
 
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
