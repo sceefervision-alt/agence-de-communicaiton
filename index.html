@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>document.documentElement.classList.add("js")</script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -31,27 +32,38 @@
 
   <!-- HERO -->
   <section class="hero" id="top">
+    <div class="hero-copy">
+      <h1><span class="line"><span>Le médecin</span></span> <span class="line"><span>de vos</span></span> <span class="line"><span>affaires.</span></span></h1>
+      <p class="hero-sub">J'aide les entrepreneurs et les structures à identifier les points de blocage, assainir leurs finances et bâtir des fondations solides de zéro. Parce qu'un business ne se redresse pas dans les livres, mais sur le terrain.</p>
+      <a class="btn btn-light magnetic" href="#contact">Demander un diagnostic</a>
+    </div>
+
+    <div class="stage" id="stage">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <div class="stage-fallback" aria-hidden="true">I</div>
+      <p class="stage-caption">Le I de ConsultIng, c'est l'impact.</p>
+    </div>
+
     <p class="hero-slogan">Ne subissez plus vos chiffres. Pilotez votre entreprise avec un diagnostic de terrain.</p>
-
-    <div class="wordmark" aria-hidden="true">
-      <svg class="pulse" focusable="false"><path d="" /></svg>
-      <span class="wordmark-text">Consult<span class="i">I</span>ng</span>
-    </div>
-
-    <div class="hero-body">
-      <h1>Le médecin de vos affaires.</h1>
-      <div class="hero-side">
-        <p>J'aide les entrepreneurs et les structures à identifier les points de blocage, assainir leurs finances et bâtir des fondations solides de zéro. Parce qu'un business ne se redresse pas dans les livres, mais sur le terrain.</p>
-        <a class="btn btn-light" href="#contact">Demander un diagnostic</a>
-      </div>
-    </div>
   </section>
+
+  <!-- BANDE -->
+  <div class="band" aria-hidden="true">
+    <div class="band-track">
+      <span>Diagnostic</span><svg viewBox="0 0 60 24"><path d="M0 12h18l5-9 8 18 5-9h24"/></svg>
+      <span>Structuration</span><svg viewBox="0 0 60 24"><path d="M0 12h18l5-9 8 18 5-9h24"/></svg>
+      <span>Pilotage</span><svg viewBox="0 0 60 24"><path d="M0 12h18l5-9 8 18 5-9h24"/></svg>
+      <span>Diagnostic</span><svg viewBox="0 0 60 24"><path d="M0 12h18l5-9 8 18 5-9h24"/></svg>
+      <span>Structuration</span><svg viewBox="0 0 60 24"><path d="M0 12h18l5-9 8 18 5-9h24"/></svg>
+      <span>Pilotage</span><svg viewBox="0 0 60 24"><path d="M0 12h18l5-9 8 18 5-9h24"/></svg>
+    </div>
+  </div>
 
   <!-- MANIFESTE -->
   <section class="section manifeste" id="manifeste">
     <div class="wrap narrow">
-      <h2>Le consulting classique vous vend de la théorie qu'il n'a jamais testée.</h2>
-      <div class="manifeste-text">
+      <h2 data-reveal>Le consulting classique vous vend de la théorie qu'il n'a jamais testée.</h2>
+      <div class="manifeste-text" data-reveal>
         <p>Chez ConsultIng, nous faisons autrement.</p>
         <p>J'ai audité des caisses vides, géré des stocks en tension, créé des marques de toutes pièces, subi les crises et redressé des structures dans les pires moments. Je connais la réalité d'un chef d'entreprise parce que je l'ai vécue les mains dans le cambouis.</p>
         <p class="lead">Mon rôle : poser un diagnostic sans concession, structurer votre organisation et redonner de l'oxygène à votre trésorerie.</p>
@@ -62,21 +74,21 @@
   <!-- PILIERS -->
   <section class="section piliers" id="expertise">
     <div class="wrap">
-      <h2 class="section-title">Trois interventions, un seul objectif : une entreprise qui tient debout.</h2>
+      <h2 data-reveal class="section-title">Trois interventions, un seul objectif : une entreprise qui tient debout.</h2>
       <div class="piliers-grid">
-        <article>
+        <article data-reveal>
           <svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M14 6v14a10 10 0 0 0 20 0V6M10 6h8M30 6h8M24 30v4a8 8 0 0 0 16 0v-4"/><circle cx="40" cy="26" r="4"/></svg>
           <h3>L'audit et le diagnostic</h3>
           <p class="metaphor">Le stéthoscope</p>
           <p>Analyse de l'existant, détection des fuites financières, contrôle interne et radiographie de la santé opérationnelle de votre structure.</p>
         </article>
-        <article>
+        <article data-reveal>
           <svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 6v36M24 14h-9M24 22h9M24 30h-9M24 38h9M15 14c-4 0-6 3-6 6M33 22c4 0 6 3 6 6"/></svg>
           <h3>La structuration et le « build »</h3>
           <p class="metaphor">L'ossature</p>
           <p>Organisation des processus, mise en place des outils de gestion (comme QuickBooks), définition des rôles et création des fondations administratives et opérationnelles.</p>
         </article>
-        <article>
+        <article data-reveal>
           <svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17"/><path d="M31 17l-5 10-10 5 5-10z"/></svg>
           <h3>Le pilotage et la rentabilité</h3>
           <p class="metaphor">La boussole</p>
@@ -89,11 +101,11 @@
   <!-- À PROPOS -->
   <section class="section apropos" id="a-propos">
     <div class="wrap apropos-grid">
-      <figure class="portrait">
+      <figure class="portrait" data-tilt>
         <img src="assets/portrait.webp" width="1024" height="1536" loading="lazy" alt="Portrait de la fondatrice de ConsultIng, en chemise blanche, les mains jointes sous le menton">
       </figure>
-      <div class="apropos-text">
-        <h2>De la réalité du terrain à l'expertise stratégique.</h2>
+      <div class="apropos-text" data-reveal>
+        <h2 data-reveal>De la réalité du terrain à l'expertise stratégique.</h2>
         <p class="lead">Je ne suis pas de celles qui ont appris l'entreprise uniquement dans des manuels scolaires ou derrière un bureau climatisé. Mon expertise, je l'ai forgée sur le terrain, dans le feu de l'action, là où les décisions se prennent et où chaque erreur se paie cash.</p>
         <p>Titulaire d'un Bachelor en finance et gestion des entreprises, j'ai rapidement compris que la théorie ne suffit pas. Ma véritable école, c'est la vie réelle des affaires. J'ai commencé par tout gérer de mes mains : de la tenue d'une caisse au contrôle rigoureux des stocks, jusqu'à démasquer des failles financières grâce à un audit interne mené par mes propres soins.</p>
         <p>Quand on m'a confié un restaurant vidé de tout, sans fonds de roulement, j'ai connu le doute, les erreurs de novice et les coups durs, jusqu'à faire face au vol et à la trahison. Mais au lieu de reculer, j'ai choisi de rebondir en recréant une structure de toutes pièces : Le Cellier des Saveurs. J'ai conçu le concept, dessiné l'identité visuelle avec mon partenaire, géré la partie administrative aux impôts et piloté la relance.</p>
@@ -107,11 +119,11 @@
   <!-- TARIFS -->
   <section class="section tarifs" id="tarifs">
     <div class="wrap">
-      <h2 class="section-title">Nos prestations et diagnostics</h2>
+      <h2 data-reveal class="section-title">Nos prestations et diagnostics</h2>
       <p class="section-intro">Chaque entreprise a sa propre pathologie. Nos interventions se déclinent en trois formules de « consultation », selon l'urgence.</p>
 
       <div class="formules">
-        <article class="formule">
+        <article data-tilt data-reveal class="formule">
           <h3>Le Bilan Flash</h3>
           <p class="sub">Diagnostic express</p>
           <p class="who">Pour les entrepreneurs qui sentent que « quelque chose bloque » (trésorerie tendue, flou dans les marges) et qui veulent un premier avis rapide.</p>
@@ -127,7 +139,7 @@
           <a class="btn btn-outline" href="#contact" data-formule="Bilan Flash">Choisir le Bilan Flash</a>
         </article>
 
-        <article class="formule featured">
+        <article data-tilt data-reveal class="formule featured">
           <p class="badge">Formule recommandée</p>
           <h3>L'Audit Global</h3>
           <p class="sub">Radiographie financière</p>
@@ -145,7 +157,7 @@
           <a class="btn btn-light" href="#contact" data-formule="Audit Global">Choisir l'Audit Global</a>
         </article>
 
-        <article class="formule">
+        <article data-tilt data-reveal class="formule">
           <h3>L'accompagnement sur mesure</h3>
           <p class="sub">Le suivi du médecin : build et pilotage</p>
           <p class="who">Pour ceux qui veulent qu'on reste à leur chevet : mettre en place les outils (QuickBooks, réorganisation de la caisse, formation des équipes) et piloter les premiers mois.</p>
@@ -168,10 +180,10 @@
   <section class="section contact" id="contact">
     <div class="wrap contact-grid">
       <div>
-        <h2>Prêt(e) à soigner ce qui bloque et à faire passer votre entreprise au niveau supérieur ?</h2>
+        <h2 data-reveal>Prêt(e) à soigner ce qui bloque et à faire passer votre entreprise au niveau supérieur ?</h2>
         <p>Parlons de votre projet. Décrivez votre situation en quelques lignes, je reviens vers vous pour fixer la consultation.</p>
       </div>
-      <form class="form" id="contact-form" novalidate>
+      <form data-reveal class="form" id="contact-form" novalidate>
         <label for="nom">Nom</label>
         <input id="nom" name="nom" type="text" autocomplete="name" required>
 
@@ -202,6 +214,8 @@
   <p class="legal">Une entreprise SCEEFER VISION</p>
 </footer>
 
+<script src="vendor/three.min.js"></script>
+<script src="scene.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
