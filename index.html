@@ -22,6 +22,7 @@
   <nav class="nav" aria-label="Navigation principale">
     <a href="#manifeste">Notre approche</a>
     <a href="#expertise">Expertise</a>
+    <a href="#outils">Autodiagnostic</a>
     <a href="#a-propos">À propos</a>
     <a href="#tarifs">Tarifs</a>
   </nav>
@@ -45,6 +46,20 @@
     </div>
 
     <p class="hero-slogan">Ne subissez plus vos chiffres. Pilotez votre entreprise avec un diagnostic de terrain.</p>
+  </section>
+
+  <!-- VIDÉO -->
+  <section class="section video" id="presentation" hidden>
+    <div class="wrap">
+      <h2>Découvrez ConsultIng en 60 secondes</h2>
+      <div class="player" id="player">
+        <video controls preload="metadata" playsinline poster="assets/intro-poster.jpg">
+          <source src="assets/intro.mp4" type="video/mp4">
+          <source src="assets/intro.webm" type="video/webm">
+          Votre navigateur ne peut pas lire cette vidéo.
+        </video>
+      </div>
+    </div>
   </section>
 
   <!-- BANDE -->
@@ -98,6 +113,72 @@
     </div>
   </section>
 
+  <!-- OUTILS D'AUTODIAGNOSTIC -->
+  <section class="section outils" id="outils">
+    <div class="wrap">
+      <h2 class="section-title" data-reveal>Faites un premier bilan de votre entreprise en 3 minutes.</h2>
+      <p class="section-intro">Deux outils pour mesurer la santé financière de votre structure : simulez votre besoin en fonds de roulement (BFR) ou répondez au quiz flash. Les résultats sont des estimations indicatives : le diagnostic complet se fait avec le cabinet.</p>
+
+      <div class="tabs" role="tablist" aria-label="Outils d'autodiagnostic">
+        <button class="tab" role="tab" id="tab-bfr" aria-selected="true" aria-controls="panel-bfr" type="button">Simulateur de BFR</button>
+        <button class="tab" role="tab" id="tab-quiz" aria-selected="false" aria-controls="panel-quiz" tabindex="-1" type="button">Quiz flash, 5 questions</button>
+      </div>
+
+      <!-- BFR -->
+      <div class="panel" id="panel-bfr" role="tabpanel" aria-labelledby="tab-bfr">
+        <div class="panel-head">
+          <div><h3>Simulateur de trésorerie et de BFR</h3><p>Ajustez vos données pour mesurer l'argent réellement bloqué dans votre cycle d'exploitation.</p></div>
+          <div class="seg" role="group" aria-label="Devise">
+            <button type="button" id="cur-fcfa" aria-pressed="true">FCFA</button>
+            <button type="button" id="cur-cad" aria-pressed="false">CAD ($)</button>
+          </div>
+        </div>
+        <div class="bfr-grid">
+          <div class="sliders">
+            <div class="slider"><div class="s-top"><label for="in-ca">Chiffre d'affaires mensuel</label><output id="val-ca" for="in-ca">10 000 000 FCFA</output></div>
+              <input type="range" id="in-ca" min="1000000" max="100000000" step="1000000" value="10000000"><div class="s-ends"><span id="min-ca">1 000 000 FCFA</span><span id="max-ca">100 000 000 FCFA</span></div></div>
+            <div class="slider"><div class="s-top"><label for="in-clients">Délai de règlement des clients</label><output id="val-clients" for="in-clients">45 jours</output></div>
+              <input type="range" id="in-clients" min="0" max="120" value="45"><p>Temps moyen pour que vos clients paient leurs factures.</p></div>
+            <div class="slider"><div class="s-top"><label for="in-stock">Rotation du stock</label><output id="val-stock" for="in-stock">20 jours</output></div>
+              <input type="range" id="in-stock" min="0" max="120" value="20"><p>Nombre de jours où vos marchandises ou matières restent immobilisées.</p></div>
+            <div class="slider"><div class="s-top"><label for="in-fourn">Crédit fournisseurs</label><output id="val-fourn" for="in-fourn">15 jours</output></div>
+              <input type="range" id="in-fourn" min="0" max="120" value="15"><p>Délai accordé par vos fournisseurs pour régler leurs factures.</p></div>
+            <p class="formula">BFR = clients + stock − fournisseurs, exprimé en jours de chiffre d'affaires.</p>
+          </div>
+          <div class="result" aria-live="polite">
+            <div class="r-top"><span>Diagnostic du BFR</span><span class="badge-state" id="bfr-badge" data-state="warn">À surveiller</span></div>
+            <p class="r-label">Besoin de financement net</p>
+            <p class="r-days" id="bfr-days">50 jours de CA</p>
+            <p class="r-cash" id="bfr-cash">16 666 667 FCFA</p>
+            <p class="r-note">Somme bloquée en permanence dans le cycle d'exploitation.</p>
+            <div class="gauge-wrap"><div class="g-top"><span>Santé du BFR</span><span id="bfr-gauge-text">Tension modérée</span></div><div class="gauge"><div id="bfr-gauge" data-state="warn" style="width:60%"></div></div></div>
+            <div class="rx-box"><h4>Prescription du médecin</h4><p id="bfr-advice"></p></div>
+            <button class="btn btn-light" type="button" id="bfr-cta">Régler mon BFR avec le cabinet</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="panel" id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+        <div id="quiz-run">
+          <div class="panel-head">
+            <div><h3>Autodiagnostic : bilan de santé financière</h3><p>Répondez à 5 questions pour évaluer la solidité de votre gestion.</p></div>
+            <div class="q-progress"><span id="quiz-step">Question 1 / 5</span><div class="gauge small"><div id="quiz-bar" style="width:20%"></div></div></div>
+          </div>
+          <div id="quiz-body" aria-live="polite"></div>
+        </div>
+        <div id="quiz-result" hidden>
+          <div class="score-head"><div class="score" id="quiz-score">0/100</div><h3 id="quiz-title">Analyse terminée</h3><p id="quiz-desc"></p></div>
+          <div class="res-grid">
+            <div class="res-card"><h4>Bilan clinique</h4><ul class="findings" id="quiz-findings"></ul></div>
+            <div class="res-card dark"><h4>Ordonnance de redressement</h4><ul class="presc" id="quiz-presc"></ul>
+              <div class="res-actions"><button class="btn btn-light" type="button" id="quiz-cta">Réserver mon bilan flash</button><button class="btn btn-ghost" type="button" id="quiz-restart">Refaire le quiz</button></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- À PROPOS -->
   <section class="section apropos" id="a-propos">
     <div class="wrap apropos-grid">
@@ -112,6 +193,20 @@
         <p>Aujourd'hui, en tant que cofondatrice, gestionnaire et comptable de l'agence SCEEFER VISION et à la tête de ConsultIng, je mets cette expérience viscérale au service des entrepreneurs.</p>
         <p>Je sais ce que c'est que de repartir de zéro, de structurer un projet qui n'existe encore que dans sa tête, et de redresser une trésorerie en tension. C'est cette combinaison rare entre rigueur financière, maîtrise des outils modernes et pragmatisme absolu du terrain qui fait de moi le « médecin de vos affaires ».</p>
         <p class="closing">Si vous cherchez quelqu'un qui comprend vraiment vos défis parce qu'elle les a traversés, vous êtes au bon endroit.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- L'ŒIL DE LA CONSULTANTE -->
+  <section class="section oeil" id="oeil">
+    <div class="wrap">
+      <h2 class="section-title" data-reveal>L’Œil de la Consultante</h2>
+      <p class="section-intro">Mes dernières publications sur LinkedIn : des regards de terrain sur la gestion, la trésorerie et l’entrepreneuriat.</p>
+      <div class="feed" id="linkedin-feed">
+        <div class="feed-fallback" id="feed-fallback">
+          <p>Retrouvez mes publications et mes analyses directement sur LinkedIn.</p>
+          <a class="btn btn-outline" href="https://www.linkedin.com/in/daniella-ada-a07966405/" target="_blank" rel="noopener">Voir mes publications sur LinkedIn</a>
+        </div>
       </div>
     </div>
   </section>
@@ -181,7 +276,7 @@
     <div class="wrap contact-grid">
       <div>
         <h2 data-reveal>Prêt(e) à soigner ce qui bloque et à faire passer votre entreprise au niveau supérieur ?</h2>
-        <p>Parlons de votre projet. Décrivez votre situation en quelques lignes, je reviens vers vous pour fixer la consultation.</p>
+        <p>Parlons de votre projet. Renseignez ce formulaire : je reviens vers vous pour fixer la consultation.</p>
         <ul class="contact-links">
           <li><a href="https://wa.me/237695312513?text=Bonjour%2C%20je%20souhaite%20demander%20un%20diagnostic%20ConsultIng." target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z"/><path d="M8.7 8.3c.3 2.6 2.6 5 5.4 5.9l1.3-1.3-1.8-1-.8.7a4.5 4.5 0 0 1-2-2l.7-.8-1-1.8Z"/></svg>
@@ -194,27 +289,56 @@
             <span>LinkedIn<small>Voir le profil</small></span></a></li>
         </ul>
       </div>
-      <form data-reveal class="form" id="contact-form" novalidate>
-        <label for="nom">Nom</label>
-        <input id="nom" name="nom" type="text" autocomplete="name" required>
+      <div class="form-wrap" data-reveal>
+        <form class="form" id="contact-form" name="demande-diagnostic" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+          <input type="hidden" name="form-name" value="demande-diagnostic">
+          <p class="hp" aria-hidden="true"><label>Ne pas remplir <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
 
-        <label for="email">Adresse e-mail</label>
-        <input id="email" name="email" type="email" autocomplete="email" required>
+          <label for="nom">Nom et prénom</label>
+          <input id="nom" name="nom" type="text" autocomplete="name" required>
 
-        <label for="formule">Formule souhaitée</label>
-        <select id="formule" name="formule">
-          <option value="Je ne sais pas encore">Je ne sais pas encore</option>
-          <option value="Bilan Flash">Bilan Flash</option>
-          <option value="Audit Global">Audit Global</option>
-          <option value="Accompagnement sur mesure">Accompagnement sur mesure</option>
-        </select>
+          <div class="row2">
+            <div><label for="email">Adresse e-mail professionnelle</label>
+              <input id="email" name="email" type="email" autocomplete="email" required></div>
+            <div><label for="tel">Numéro WhatsApp / téléphone</label>
+              <input id="tel" name="telephone" type="tel" autocomplete="tel" placeholder="+237 …" required></div>
+          </div>
 
-        <label for="message">Votre situation</label>
-        <textarea id="message" name="message" rows="4" required></textarea>
+          <div class="row2">
+            <div><label for="entreprise">Nom de l’entreprise</label>
+              <input id="entreprise" name="entreprise" type="text" autocomplete="organization" required></div>
+            <div><label for="secteur">Secteur d’activité</label>
+              <input id="secteur" name="secteur" type="text" required></div>
+          </div>
 
-        <p class="form-error" id="form-error" role="alert" hidden>Renseignez votre nom, une adresse e-mail valide et votre situation.</p>
-        <button class="btn btn-light" type="submit">Réserver une consultation</button>
-      </form>
+          <label for="formule">Formule souhaitée</label>
+          <select id="formule" name="formule">
+            <option value="Je ne sais pas encore">Je ne sais pas encore</option>
+            <option value="Bilan Flash">Bilan Flash</option>
+            <option value="Audit Global">Audit Global</option>
+            <option value="Accompagnement sur mesure">Accompagnement sur mesure</option>
+          </select>
+
+          <label for="defi">Quel est votre défi prioritaire ?</label>
+          <select id="defi" name="defi" required>
+            <option value="" disabled selected>Choisissez dans la liste</option>
+            <option value="Problème de trésorerie / BFR sous tension">Problème de trésorerie / BFR sous tension</option>
+            <option value="Manque de visibilité / Absence de tableau de bord">Manque de visibilité / Absence de tableau de bord</option>
+            <option value="Besoin de restructurer la comptabilité / QuickBooks">Besoin de restructurer la comptabilité / QuickBooks</option>
+            <option value="Autre / Projet de création ou de reprise">Autre / Projet de création ou de reprise</option>
+          </select>
+
+          <label for="message">Votre situation</label>
+          <textarea id="message" name="situation" rows="4"></textarea>
+
+          <p class="form-error" id="form-error" role="alert" hidden></p>
+          <button class="btn btn-light" type="submit" id="form-submit">Envoyer ma demande de diagnostic</button>
+        </form>
+        <div class="form-ok" id="form-ok" role="status" tabindex="-1" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.500 3 3 6-7"/></svg>
+          <p>Merci ! Votre demande a bien été reçue. Je consulte votre message et je vous recontacte sous 24h par e-mail ou WhatsApp pour fixer ensemble le créneau qui vous convient.</p>
+        </div>
+      </div>
     </div>
   </section>
 </main>
@@ -232,6 +356,7 @@
 
 <script src="vendor/three.min.js"></script>
 <script src="scene.js"></script>
+<script src="outils.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
