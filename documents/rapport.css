@@ -1,0 +1,22 @@
+.doc-title h1 { line-height: 1.08; }
+.ident .nref { padding-top: 1.6mm; }
+.ident .nref .fill { display: inline-block; vertical-align: baseline; }
+.ident .date .fill { display: block; width: 100%; }
+.sec.s2 { margin-top: 5mm; }
+.doc-title { margin-bottom: 5mm; }
+.ident { margin-bottom: 5mm; }
+.goal { margin-bottom: 3mm; }
+.alert { margin: 0 0 1.5mm 18mm; }
+.an { font: 600 11pt var(--serif); color: var(--wine); }
+.an span { font: italic 400 9pt var(--serif); color: var(--wine-soft); margin-left: 3mm; }
+.lines { --p: 7.5mm; }
+.act { margin: 0 0 2mm 18mm; }
+.act h3 { font: 600 12pt var(--serif); color: var(--wine); }
+.act h3 span { font: italic 400 9.5pt var(--serif); color: var(--wine-soft); margin-left: 3mm; }
+.act.mod { margin-left: 0; margin-top: 4mm; }
+.rx { margin-left: 18mm; }
+.rx li { padding: 2.2mm 5mm; margin-top: 1.8mm; }
+.stamp { display: grid; grid-template-columns: 1fr 70mm; gap: 8mm; align-items: end; margin-top: 4mm; }
+.stamp .st b { display: block; font: 600 11pt var(--serif); color: var(--wine); }
+.stamp .st span { font: 500 15pt var(--serif); color: var(--ink); }
+.stamp .box-sig { height: 22mm; }
