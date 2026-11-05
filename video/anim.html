@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>ConsultIng – vidéo de présentation (60 s)</title>
+<style>
+@font-face { font-family: "Bodoni Moda"; font-weight: 400; src: url(../documents/fonts/bodoni-moda-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Bodoni Moda"; font-weight: 500; src: url(../documents/fonts/bodoni-moda-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Bodoni Moda"; font-weight: 700; src: url(../documents/fonts/bodoni-moda-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Bodoni Moda"; font-weight: 400; font-style: italic; src: url(../documents/fonts/bodoni-moda-latin-400-italic.woff2) format("woff2"); }
+@font-face { font-family: "Hanken Grotesk"; font-weight: 400; src: url(../documents/fonts/hanken-grotesk-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Hanken Grotesk"; font-weight: 600; src: url(../documents/fonts/hanken-grotesk-latin-600-normal.woff2) format("woff2"); }
+
+:root { --wine: #5b0f1b; --deep: #3a0910; --soft: #7a2230; --rose: #f1c4cb; --blush: #f6edee; --ink: #2b1519;
+  --serif: "Bodoni Moda", Georgia, serif; --sans: "Hanken Grotesk", system-ui, sans-serif; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+#stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; font-family: var(--sans); color: #fff; background: var(--deep); }
+
+/* Scènes : fondu d'entrée et de sortie de 0,6 s, positions dans le temps via --s (début) et --d (durée) */
+.scene { position: absolute; inset: 0; opacity: 0;
+  animation: fin .6s var(--s) both, fout .6s calc(var(--s) + var(--d) - .6s) forwards; }
+.scene.first { animation: fin .01s 0s both, fout .6s calc(var(--s) + var(--d) - .6s) forwards; }
+@keyframes fin { from { opacity: 0 } to { opacity: 1 } }
+@keyframes fout { from { opacity: 1 } to { opacity: 0 } }
+.dark { background: radial-gradient(1400px circle at 70% 30%, var(--wine), var(--deep) 70%); }
+.wine { background: var(--wine); }
+.light { background: var(--blush); color: var(--ink); }
+
+/* Mouvements communs */
+.ln { display: block; overflow: hidden; padding: .12em 0 .16em; margin: -.12em 0 -.16em; }
+.ln > span { display: inline-block; transform: translateY(115%); animation: up 1s cubic-bezier(.2,.8,.2,1) calc(var(--s) + var(--o, 0s)) both; }
+@keyframes up { from { transform: translateY(115%) } to { transform: none } }
+.fade { opacity: 0; animation: fadeup .9s cubic-bezier(.2,.8,.2,1) calc(var(--s) + var(--o, 0s)) both; }
+@keyframes fadeup { from { opacity: 0; transform: translateY(26px) } to { opacity: 1; transform: none } }
+.drift { animation: drift 12s ease-in-out infinite alternate; }
+@keyframes drift { from { transform: scale(1) } to { transform: scale(1.05) } }
+
+/* Ligne de pouls permanente en bas */
+.beat { position: absolute; left: 0; bottom: 70px; width: 3840px; height: 90px; opacity: .35; animation: slide 7s linear infinite; }
+.beat path { fill: none; stroke: var(--rose); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes slide { to { transform: translateX(-1920px) } }
+
+/* Scène 1 : le I et le tracé */
+.s1 .mark { position: absolute; left: 0; right: 0; top: 300px; text-align: center; font: 500 300px/1 var(--serif); letter-spacing: -.03em; }
+.s1 .mark span { display: inline-block; opacity: 0; animation: pop .8s cubic-bezier(.2,.8,.2,1) calc(var(--o)) both; }
+.s1 .mark .i { color: var(--rose); font-weight: 700; }
+@keyframes pop { from { opacity: 0; transform: translateY(40px) scale(.94) } to { opacity: 1; transform: none } }
+#ecg { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+#ecg path { fill: none; stroke: var(--rose); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 5000; stroke-dashoffset: 5000; animation: draw 2.6s cubic-bezier(.5,0,.2,1) .3s both; }
+@keyframes draw { to { stroke-dashoffset: 0 } }
+.s1 .sub { position: absolute; left: 0; right: 0; top: 700px; text-align: center; font: italic 400 54px/1.2 var(--serif); color: var(--rose); }
+
+/* Scènes de texte */
+.txt { position: absolute; left: 160px; right: 160px; top: 50%; transform: translateY(-50%); }
+.txt .big { font: 500 128px/1.08 var(--serif); letter-spacing: -.02em; }
+.txt .big em { font-style: italic; color: var(--rose); }
+.txt .small { margin-top: 50px; font: 400 40px/1.4 var(--sans); color: rgba(255,255,255,.8); max-width: 1100px; }
+.rule { position: absolute; left: 160px; top: 150px; width: 120px; height: 6px; background: var(--rose); transform-origin: left; transform: scaleX(0); animation: grow .9s cubic-bezier(.2,.8,.2,1) calc(var(--s) + .1s) both; }
+@keyframes grow { to { transform: scaleX(1) } }
+
+/* Piliers */
+.pil .icon { position: absolute; left: 190px; top: 50%; width: 420px; height: 420px; margin-top: -250px; fill: none; stroke: var(--rose); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.pil .icon * { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw2 1.6s ease calc(var(--s) + .2s) both; }
+@keyframes draw2 { to { stroke-dashoffset: 0 } }
+.pil .t { position: absolute; left: 780px; right: 150px; top: 50%; transform: translateY(-50%); }
+.pil h3 { font: 500 100px/1.08 var(--serif); letter-spacing: -.015em; }
+.pil .meta { margin-top: 26px; font: italic 400 56px var(--serif); color: var(--rose); }
+.pil p { margin-top: 38px; font: 400 40px/1.45 var(--sans); color: rgba(255,255,255,.85); max-width: 1000px; }
+.dots { position: absolute; left: 780px; bottom: 150px; display: flex; gap: 16px; }
+.dots i { width: 60px; height: 6px; background: rgba(255,255,255,.25); }
+.dots i.on { background: var(--rose); }
+
+/* Offres (fond clair) */
+.offer .head { position: absolute; left: 160px; top: 150px; font: 500 96px/1.1 var(--serif); color: var(--wine); }
+.offer .cols { position: absolute; left: 160px; right: 160px; top: 410px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; }
+.offer .c { background: #fff; padding: 56px 50px 60px; border-top: 8px solid var(--wine); opacity: 0; animation: fadeup .9s cubic-bezier(.2,.8,.2,1) calc(var(--s) + var(--o)) both; }
+.offer .c.f { background: var(--wine); color: #fff; }
+.offer .c b { display: block; font: 500 78px/1.08 var(--serif); color: var(--wine); }
+.offer .c.f b { color: #fff; }
+.offer .c span { display: block; margin-top: 28px; font: 400 42px/1.4 var(--sans); color: var(--ink); opacity: .8; }
+.offer .c.f span { color: #fff; }
+
+/* CTA */
+.cta .big { font: 500 150px/1.05 var(--serif); letter-spacing: -.02em; }
+.cta .big em { color: var(--rose); font-style: italic; }
+.cta .row { margin-top: 70px; display: flex; gap: 70px; font: 600 44px var(--sans); }
+.cta .row small { display: block; font: 400 28px var(--sans); color: var(--rose); margin-bottom: 8px; }
+.cta .brand { position: absolute; right: 160px; bottom: 130px; font: 500 70px var(--serif); }
+.cta .brand .i { color: var(--rose); font-weight: 700; }
+</style></head>
+<body>
+<div id="stage">
+
+  <!-- 1. Le I et le pouls (0 – 6,5 s) -->
+  <section class="scene first dark s1" style="--s:0s; --d:6.5s">
+    <svg id="ecg" viewBox="0 0 1920 1080" aria-hidden="true"><path id="ecg-path" d=""/></svg>
+    <div class="mark" id="mark">
+      <span style="--o:.5s">C</span><span style="--o:.56s">o</span><span style="--o:.62s">n</span><span style="--o:.68s">s</span><span style="--o:.74s">u</span><span style="--o:.8s">l</span><span style="--o:.86s">t</span><span class="i" id="mark-i" style="--o:2.4s">I</span><span style="--o:.92s">n</span><span style="--o:.98s">g</span>
+    </div>
+    <div class="sub fade" style="--s:0s; --o:3.2s">Le médecin de vos affaires</div>
+  </section>
+
+  <!-- 2. Le terrain (6 – 15 s) -->
+  <section class="scene dark" style="--s:6s; --d:9s">
+    <div class="rule" style="--s:6s"></div>
+    <div class="txt drift">
+      <div class="big">
+        <span class="ln" style="--s:6s"><span style="--o:.4s">Un business ne se redresse</span></span>
+        <span class="ln" style="--s:6s"><span style="--o:.7s">pas dans les livres,</span></span>
+        <span class="ln" style="--s:6s"><span style="--o:1.8s"><em>mais sur le terrain.</em></span></span>
+      </div>
+      <p class="small fade" style="--s:6s; --o:3.6s">J’aide les entrepreneurs à identifier les points de blocage, assainir leurs finances et bâtir des fondations solides.</p>
+    </div>
+  </section>
+
+  <!-- 3. Le slogan (14,5 – 25 s) -->
+  <section class="scene wine" style="--s:14.5s; --d:10.5s">
+    <div class="rule" style="--s:14.5s"></div>
+    <div class="txt">
+      <div class="big">
+        <span class="ln" style="--s:14.5s"><span style="--o:.4s">Ne subissez plus</span></span>
+        <span class="ln" style="--s:14.5s"><span style="--o:.7s">vos chiffres.</span></span>
+        <span class="ln" style="--s:14.5s; margin-top:30px"><span style="--o:2.6s; color:var(--rose); font-style:italic">Pilotez votre entreprise</span></span>
+        <span class="ln" style="--s:14.5s"><span style="--o:2.9s; color:var(--rose); font-style:italic">avec un diagnostic de terrain.</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4a. Audit et diagnostic (24,5 – 32 s) -->
+  <section class="scene dark pil" style="--s:24.5s; --d:7.5s">
+    <svg class="icon" viewBox="0 0 48 48"><path d="M14 6v14a10 10 0 0 0 20 0V6M10 6h8M30 6h8M24 30v4a8 8 0 0 0 16 0v-4"/><circle cx="40" cy="26" r="4"/></svg>
+    <div class="t"><h3><span class="ln" style="--s:24.5s"><span style="--o:.3s">L’audit et</span></span><span class="ln" style="--s:24.5s"><span style="--o:.5s">le diagnostic</span></span></h3>
+      <div class="meta fade" style="--s:24.5s; --o:1.3s">Le stéthoscope</div>
+      <p class="fade" style="--s:24.5s; --o:1.9s">Détection des fuites financières, contrôle interne et radiographie de la santé opérationnelle de votre structure.</p></div>
+    <div class="dots"><i class="on"></i><i></i><i></i></div>
+  </section>
+
+  <!-- 4b. Structuration (31,5 – 39 s) -->
+  <section class="scene dark pil" style="--s:31.5s; --d:7.5s">
+    <svg class="icon" viewBox="0 0 48 48"><path d="M24 6v36M24 14h-9M24 22h9M24 30h-9M24 38h9M15 14c-4 0-6 3-6 6M33 22c4 0 6 3 6 6"/></svg>
+    <div class="t"><h3><span class="ln" style="--s:31.5s"><span style="--o:.3s">La structuration</span></span><span class="ln" style="--s:31.5s"><span style="--o:.5s">et le « build »</span></span></h3>
+      <div class="meta fade" style="--s:31.5s; --o:1.3s">L’ossature</div>
+      <p class="fade" style="--s:31.5s; --o:1.9s">Organisation des processus, outils de gestion, rôles clairs et fondations administratives et opérationnelles.</p></div>
+    <div class="dots"><i></i><i class="on"></i><i></i></div>
+  </section>
+
+  <!-- 4c. Pilotage (38,5 – 46 s) -->
+  <section class="scene dark pil" style="--s:38.5s; --d:7.5s">
+    <svg class="icon" viewBox="0 0 48 48"><circle cx="24" cy="24" r="17"/><path d="M31 17l-5 10-10 5 5-10z"/></svg>
+    <div class="t"><h3><span class="ln" style="--s:38.5s"><span style="--o:.3s">Le pilotage et</span></span><span class="ln" style="--s:38.5s"><span style="--o:.5s">la rentabilité</span></span></h3>
+      <div class="meta fade" style="--s:38.5s; --o:1.3s">La boussole</div>
+      <p class="fade" style="--s:38.5s; --o:1.9s">Suivi des indicateurs, seuil de rentabilité, gestion du BFR et tableaux de bord sur mesure.</p></div>
+    <div class="dots"><i></i><i></i><i class="on"></i></div>
+  </section>
+
+  <!-- 5. Les formules (45,5 – 53,5 s) -->
+  <section class="scene light offer" style="--s:45.5s; --d:8s">
+    <div class="head"><span class="ln" style="--s:45.5s"><span style="--o:.3s">Trois formules,</span></span><span class="ln" style="--s:45.5s"><span style="--o:.5s">selon votre urgence.</span></span></div>
+    <div class="cols">
+      <div class="c" style="--s:45.5s; --o:1.2s"><b>Bilan Flash</b><span>Diagnostic express pour un premier avis rapide.</span></div>
+      <div class="c f" style="--s:45.5s; --o:1.6s"><b>Audit Global</b><span>Radiographie financière complète et feuille de route.</span></div>
+      <div class="c" style="--s:45.5s; --o:2s"><b>Accompagnement sur mesure</b><span>Mise en place des outils et pilotage dans la durée.</span></div>
+    </div>
+  </section>
+
+  <!-- 6. Appel à l'action (53 – 60 s) -->
+  <section class="scene dark cta" style="--s:53s; --d:7s">
+    <svg class="beat" viewBox="0 0 3840 90" preserveAspectRatio="none" aria-hidden="true"><path d="M0 45H520l30-40 40 80 30-40H1400l30-40 40 80 30-40H1920M1920 45H2440l30-40 40 80 30-40H3320l30-40 40 80 30-40H3840"/></svg>
+    <div class="txt">
+      <div class="big">
+        <span class="ln" style="--s:53s"><span style="--o:.3s">Demandez votre</span></span>
+        <span class="ln" style="--s:53s"><span style="--o:.5s"><em>diagnostic.</em></span></span>
+      </div>
+      <div class="row fade" style="--s:53s; --o:1.4s">
+        <div><small>WhatsApp</small>+237 680 807 047</div>
+        <div><small>E-mail</small>cabconsulting0@gmail.com</div>
+      </div>
+    </div>
+    <div class="brand fade" style="--s:53s; --o:2s">Consult<span class="i">I</span>ng</div>
+  </section>
+
+</div>
+<script>
+// Le tracé d'électrocardiogramme de la scène 1 monte dans le « I » du logo.
+function buildEcg() {
+  const i = document.getElementById("mark-i").getBoundingClientRect();
+  const m = document.getElementById("mark").getBoundingClientRect();
+  const x = i.left + i.width / 2, base = m.top + m.height * 0.86, top = m.top - 120, low = base + 130, u = 34;
+  const d = [`M-20 ${base}`, `H${x - u * 14}`, `l${u} 0 l${u} ${-u * 1.3} l${u} ${u * 1.3} l${u * .6} 0`,
+    `l${u * .7} ${u * 1.6} l${u * 1} ${-u * 2.8}`, `L${x} ${top}`, `L${x + u * 1.3} ${low}`, `L${x + u * 2.6} ${base}`, `H1940`].join(" ");
+  document.getElementById("ecg-path").setAttribute("d", d);
+}
+document.fonts.ready.then(buildEcg);
+
+// Contrôle du temps (utilisé par le script de rendu image par image).
+window.seek = (t) => {
+  document.getAnimations().forEach((a) => { a.pause(); a.currentTime = t * 1000; });
+};
+</script>
+</body></html>

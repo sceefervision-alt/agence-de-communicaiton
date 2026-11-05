@@ -115,6 +115,17 @@ if (track && !reduced) {
   if (!video) return;
   video.addEventListener("loadedmetadata", () => { section.hidden = false; }, { once: true });
   video.load();
+  // Lecture automatique, sans son, quand la vidéo arrive à l'écran (sauf si le visiteur réduit les animations).
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    video.muted = true;
+    let started = false;
+    new IntersectionObserver((entries, obs) => {
+      if (!started && entries[0].isIntersecting) {
+        started = true; obs.disconnect();
+        video.play().catch(() => {});
+      }
+    }, { threshold: 0.5 }).observe(player);
+  }
 })();
 
 // ---------------------------------------------------------------------------
