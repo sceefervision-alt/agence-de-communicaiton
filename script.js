@@ -12,7 +12,7 @@ const SITE = {
     postUrls: [],     // ou liens d'intégration de posts : "https://www.linkedin.com/embed/feed/update/urn:li:share:XXXX"
   },
 };
-const CONTACT = { whatsapp: "https://wa.me/237695312513", email: "zaraada23@gmail.com" };
+const CONTACT = { whatsapp: "https://wa.me/237680807047", email: "cabconsulting0@gmail.com" };
 
 
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
