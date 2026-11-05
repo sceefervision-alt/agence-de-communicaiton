@@ -11,9 +11,8 @@
 .cv-title { position: absolute; left: 20mm; top: 78mm; width: 120mm; }
 .cv-title h1 { font: 500 46pt/1.02 var(--serif); letter-spacing: -.02em; }
 .cv-title p { margin-top: 9mm; padding-top: 5mm; border-top: 1px solid rgba(255,255,255,.4); width: 60mm; font: italic 400 13pt/1.35 var(--serif); color: var(--rose); }
-.cv-photo { position: absolute; right: 0; bottom: 0; width: 100mm; height: 128mm; border-radius: 50mm 0 0 0; overflow: hidden; border: 0; }
-.cv-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; }
-.cv-photo::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 0 transparent; border-top: 2.5mm solid var(--rose); border-left: 2.5mm solid var(--rose); border-radius: 50mm 0 0 0; }
+.cv-mark { position: absolute; right: -22mm; top: 112mm; font: 500 290mm/1 var(--serif); color: rgba(255,255,255,.08); letter-spacing: -.04em; pointer-events: none; }
+.cv-rule { position: absolute; right: 20mm; bottom: 20mm; width: 40mm; height: 3mm; background: var(--rose); }
 .cv-foot { position: absolute; left: 20mm; bottom: 20mm; font-size: 9pt; line-height: 1.7; color: rgba(255,255,255,.85); }
 
 /* Vue d'ensemble */
