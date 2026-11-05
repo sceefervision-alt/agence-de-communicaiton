@@ -1,0 +1,63 @@
+.slim { position: absolute; left: 20mm; right: 20mm; top: 13mm; display: flex; justify-content: space-between; align-items: center; padding-bottom: 3.5mm; border-bottom: 1px solid var(--line); }
+.brand.s { gap: 2.5mm; } .brand.s .mono { width: 8mm; height: 8mm; font-size: 14pt; } .brand.s .brand-name { font-size: 14pt; }
+.slim-r { font: italic 500 10pt var(--serif); color: var(--wine-soft); }
+.body2 { position: absolute; left: 20mm; right: 20mm; top: 34mm; bottom: 26mm; }
+
+/* Couverture */
+.cover { background: var(--wine); color: #fff; }
+.cover .brand-name { color: #fff; } .cover .brand-sub { color: rgba(255,255,255,.75); }
+.mono.inv { background: #fff; color: var(--wine); }
+.cv-top { position: absolute; left: 20mm; top: 20mm; }
+.cv-title { position: absolute; left: 20mm; top: 78mm; width: 120mm; }
+.cv-title h1 { font: 500 46pt/1.02 var(--serif); letter-spacing: -.02em; }
+.cv-title p { margin-top: 9mm; padding-top: 5mm; border-top: 1px solid rgba(255,255,255,.4); width: 60mm; font: italic 400 13pt/1.35 var(--serif); color: var(--rose); }
+.cv-photo { position: absolute; right: 0; bottom: 0; width: 100mm; height: 128mm; border-radius: 50mm 0 0 0; overflow: hidden; border: 0; }
+.cv-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; }
+.cv-photo::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 0 transparent; border-top: 2.5mm solid var(--rose); border-left: 2.5mm solid var(--rose); border-radius: 50mm 0 0 0; }
+.cv-foot { position: absolute; left: 20mm; bottom: 20mm; font-size: 9pt; line-height: 1.7; color: rgba(255,255,255,.85); }
+
+/* Vue d'ensemble */
+.big { font: 500 24pt/1.12 var(--serif); color: var(--wine); max-width: 150mm; }
+.lead { margin: 4mm 0 8mm; font: italic 400 11.5pt/1.5 var(--serif); color: var(--wine-soft); max-width: 140mm; }
+.cmp { width: 100%; border-collapse: collapse; font-size: 9pt; }
+.cmp thead th { text-align: left; font-weight: 600; font-size: 8pt; color: var(--ink-soft); padding: 0 3mm 2.5mm 0; border-bottom: 2px solid var(--wine); }
+.cmp tbody th, .cmp td { text-align: left; padding: 4.2mm 3mm 4.2mm 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.cmp tbody th { font-weight: 400; width: 54mm; }
+.cmp .d { display: block; font: 500 17pt/1 var(--serif); color: var(--wine); }
+.cmp .nm { display: block; font-size: 8.2pt; color: var(--ink-soft); margin-top: 1mm; }
+.cmp .pr { font: 600 10.5pt var(--serif); color: var(--wine); white-space: nowrap; }
+.cmp .pr small { display: block; font: 400 8.2pt var(--sans); color: var(--ink-soft); margin-top: .8mm; }
+.cmp tr.best td, .cmp tr.best th { background: var(--blush); }
+.cmp tr.best th { padding-left: 3mm; } .cmp tr.best td:last-child { padding-right: 3mm; }
+.mid { font: 500 16pt var(--serif); color: var(--wine); margin: 11mm 0 4mm; }
+.pil { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm 8mm; }
+.pil li { display: flex; align-items: baseline; gap: 3.5mm; padding: 4mm 0; font-size: 10.4pt; border-top: 1px solid var(--line); font-weight: 500; }
+.pil li span { font: 500 17pt/1 var(--serif); color: var(--wine); width: 6mm; flex: none; }
+
+/* Pages de packs */
+.pk-head { position: absolute; left: 0; right: 0; top: 27mm; height: 56mm; background: var(--blush); padding: 0 20mm; display: flex; align-items: center; gap: 9mm; }
+.pk-dur { white-space: nowrap; font: 500 44pt/1 var(--serif); color: var(--wine); letter-spacing: -.02em; padding-right: 9mm; border-right: 1px solid var(--line); }
+.pk-tag { display: inline-block; font-weight: 600; font-size: 8.6pt; color: var(--wine); border: 1.2px solid var(--wine); padding: .6mm 2.6mm; margin-right: 2.5mm; }
+.bs { display: inline-block; background: var(--wine); color: #fff; font-weight: 600; font-size: 8.6pt; padding: 1.1mm 2.8mm; }
+.pk-id h2 { font: 500 21pt/1.12 var(--serif); color: var(--ink); margin-top: 3.5mm; }
+.pk { top: 92mm; display: flex; flex-direction: column; }
+.obj { font: italic 400 14pt/1.5 var(--serif); color: var(--wine); padding-left: 5mm; border-left: 2.5px solid var(--wine); margin-bottom: 9mm; }
+.obj span { display: block; font: 600 8.6pt var(--sans); font-style: normal; color: var(--ink-soft); margin-bottom: 1mm; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 9mm; }
+.cols h3 { font: 600 12.5pt var(--serif); color: var(--wine); padding-bottom: 2mm; border-bottom: 2px solid var(--wine); margin-bottom: 1mm; }
+.bl li { position: relative; font-size: 10.2pt; line-height: 1.5; padding: 3.2mm 0 3.2mm 5.5mm; border-bottom: 1px solid var(--line); }
+.bl li::before { content: ""; position: absolute; left: 0; top: 5.9mm; width: 2.2mm; height: 2.2mm; background: var(--wine); transform: rotate(45deg) scale(.8); }
+.bl b { font-weight: 600; color: var(--wine); } .bl em { color: var(--ink-soft); }
+.price { margin-top: auto; background: var(--wine); color: #fff; padding: 7mm 9mm; display: flex; justify-content: space-between; align-items: center; }
+.price .lbl { display: block; font-size: 8.6pt; color: var(--rose); margin-bottom: 1mm; }
+.price .amt { font: 500 25pt/1 var(--serif); }
+.price .eur { font: italic 400 13pt var(--serif); color: var(--rose); margin-left: 4mm; }
+.price .pay { font-size: 9pt; max-width: 52mm; text-align: right; color: rgba(255,255,255,.9); }
+
+/* Contact */
+.closing .cl { position: absolute; left: 20mm; right: 20mm; top: 70mm; }
+.closing h2 { font: 500 34pt/1.05 var(--serif); color: var(--wine); max-width: 130mm; }
+.closing p { margin: 7mm 0 12mm; font: italic 400 12pt/1.55 var(--serif); color: var(--wine-soft); max-width: 125mm; }
+.ct li { display: grid; grid-template-columns: 34mm 1fr; padding: 4mm 0; border-top: 1px solid var(--line); font-size: 11pt; }
+.ct li:last-child { border-bottom: 1px solid var(--line); }
+.ct b { font-weight: 600; font-size: 9pt; color: var(--ink-soft); padding-top: 1mm; }
