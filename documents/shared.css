@@ -41,3 +41,6 @@ ul { padding: 0; list-style: none; }
 .lh-foot .n { font-family: var(--serif); color: var(--wine); font-size: 9pt; }
 .lh-bar-b { position: absolute; left: 0; right: 0; bottom: 0; height: 4mm; background: var(--wine); }
 .body { position: absolute; left: 20mm; right: 20mm; top: 50mm; bottom: 26mm; }
+
+.ii { font-weight: 700; color: #b5495b; }
+.cover .ii { color: var(--rose); }
