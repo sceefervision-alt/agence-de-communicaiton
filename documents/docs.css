@@ -1,0 +1,41 @@
+/* Documents au fil de l'eau : l'en-tête et le pied de page se répètent sur chaque page */
+html, body { background: #fff; }
+@page { size: A4; margin: 50mm 20mm 28mm 20mm; }
+body { background: #fff; }
+@page { size: A4; margin: 50mm 20mm 28mm 20mm;
+  @bottom-left { font: 400 7.4pt "Hanken Grotesk", sans-serif; color: #5c4549; vertical-align: top; padding-top: 11mm; text-align: left; }
+  @bottom-right { content: counter(page) " / " counter(pages); font: 500 9pt "Bodoni Moda", serif; color: #5b0f1b; vertical-align: top; padding-top: 10mm; text-align: right; }
+}
+body { font-size: 10pt; line-height: 1.55; }
+.doc { display: block; }
+.doc-title { margin-bottom: 6mm; }
+.doc-title h1 { font-size: 22pt; line-height: 1.12; }
+.between { margin: 5mm 0 2.5mm; }
+.para { margin: 0 0 3.5mm; }
+.party.wide { margin-bottom: 4mm; break-inside: avoid; }
+.party.wide p { margin: 0 0 1.2mm; }
+.art { margin-bottom: 5mm; }
+.art p { text-align: left; hyphens: manual; }
+.art h4 { font: 600 10.5pt var(--serif); color: var(--wine-soft); margin: 3mm 0 1mm; }
+.art .dash li { margin-bottom: 1.4mm; }
+.ph { color: #7a6468; font-style: italic; border-bottom: 1px dotted var(--wine); padding: 0 .12em; }
+dl.meta { background: var(--blush); border-top: 2.2px solid var(--wine); padding: 3mm 5mm; margin: 0 0 6mm; display: grid; grid-template-columns: 42mm 1fr; gap: 1.6mm 4mm; break-inside: avoid; }
+dl.meta > div { display: contents; }
+dl.meta dt { font-weight: 600; font-size: 8.8pt; color: var(--wine); padding-top: .4mm; }
+dl.meta dd { margin: 0; }
+.fait { margin: 7mm 0 5mm; break-after: avoid; }
+.sigs { break-inside: avoid; }
+.sigs .box-sig { height: 32mm; }
+.accord { margin-top: 8mm; break-inside: avoid; }
+.accord h3 { font: 600 12pt var(--serif); color: var(--wine); }
+.accord p { margin: 1mm 0 2mm; }
+.accord .box-sig { height: 34mm; }
+.signoff { margin-top: 8mm; padding-top: 4mm; border-top: 1px solid var(--line); break-inside: avoid; }
+.signoff b { display: block; font: 600 11.5pt var(--serif); color: var(--wine); }
+.signoff span { color: var(--ink-soft); }
+
+/* Article en bloc (le numéro est posé en absolu) : évite qu'un filet se détache en bas de page */
+.art { display: block; position: relative; padding-left: 14mm; break-inside: avoid; }
+.art > .num { position: absolute; left: 0; top: 0; width: 11mm; }
+.art { background: linear-gradient(var(--wine), var(--wine)) 0 0 / 11mm 1.5px no-repeat; }
+.art > .num { border-top: 0; padding-top: 1.6mm; }
