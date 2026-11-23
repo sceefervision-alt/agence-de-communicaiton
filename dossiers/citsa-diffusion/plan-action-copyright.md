@@ -2,14 +2,15 @@
 
 **Chaînes :** officielle https://www.youtube.com/@CITSA_INTERNATIONAL · copieuse https://www.youtube.com/@CITSADiffusion (ID `UCLVkBo4tza_vcwfY2je9-Og`)
 **Preuves et liste des vidéos :** voir `preuves-citsa-diffusion.md`
+**Mode d'emploi détaillé, écran par écran :** voir `GUIDE-PAS-A-PAS.md`
 
 ## Stratégie retenue (après analyse des deux chaînes)
 
 1. **Avant tout, vérifier avec le client** que personne de son entourage (disciple, monteur, ancien prestataire) n'a créé CITSA Diffusion, et à qui appartient le **+237 677246193** affiché dans sa description. Si c'est un membre de l'équipe, il faut régler ça en interne, pas par une plainte.
 2. **Envoyer les plaintes en au moins 3 envois séparés, sur des jours différents.** Commencer par les vidéos les plus vues (priorité 1). YouTube peut regrouper en un seul avertissement plusieurs retraits faits en même temps. En étalant les envois, on maximise les chances d'atteindre les 3 avertissements qui ferment la chaîne.
-   - Envoi 1 : l6tQ45ShDy8, NMeRKl1ye9M, ik06ZzOpZyY, 3ey03wc0T6o, E1WxPaesYr4
-   - Envoi 2 (le lendemain) : T0jPKR6DPy0, QqH34VwjRjg, ARhtZ0WXp6s, Gaws2G8DaaM, k0yjZJhBkXQ
-   - Envoi 3 (le surlendemain) : Y-Ttb--HBkQ, 4iUU4twyAXI, SHP0_m3qDcc, C2b1FOy-PaI, iDF5ZoSKRpA
+   - Envoi 1 : l6tQ45ShDy8, QqH34VwjRjg, ARhtZ0WXp6s, Gaws2G8DaaM, k0yjZJhBkXQ
+   - Envoi 2 (le lendemain) : Y-Ttb--HBkQ, SHP0_m3qDcc, J5CTudpW8VU, 1LaJu4XlNa4, C2b1FOy-PaI
+   - Envoi 3 (le surlendemain) : iDF5ZoSKRpA, pTwwpxQDDaA, Lb8GNJgm0jE, T0jPKR6DPy0 + les vidéos très vues dont le client aura identifié l'origine (NMeRKl1ye9M, ik06ZzOpZyY, 3ey03wc0T6o, E1WxPaesYr4, 4iUU4twyAXI)
    - Ensuite : tout le reste, Shorts compris
 3. **En parallèle, signaler l'usurpation d'identité** (même nom, description copiée, numéro WhatsApp modifié) : voir section 4.
 4. **Prévenir l'audience** sur la chaîne officielle : « CITSA Diffusion n'est pas notre chaîne. Le seul numéro officiel est le +237 679562509. »
