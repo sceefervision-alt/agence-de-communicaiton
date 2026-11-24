@@ -113,7 +113,7 @@ Cliquez sur **Ajouter une autre vidéo** pour chacune des 5 vidéos de l'envoi.
 
 1. Ouvrir https://support.google.com/youtube/answer/2801947 → lien vers le **formulaire de signalement d'usurpation d'identité**
 2. Choisir **« Une chaîne se fait passer pour ma chaîne / mon organisation »**
-3. Chaîne officielle : `https://www.youtube.com/@CITSA_INTERNATIONAL`
+3. Chaîne officielle : `https://www.youtube.com/@CITSA_INTERNATIONAL`\
    Chaîne qui usurpe : `https://www.youtube.com/@CITSADiffusion`
 4. Explication à coller :
 
@@ -128,10 +128,10 @@ Cliquez sur **Ajouter une autre vidéo** pour chacune des 5 vidéos de l'envoi.
 
 **Post Communauté** sur la chaîne CITSA (et sur WhatsApp / Facebook si le client y est présent) :
 
-> ⚠️ ATTENTION ⚠️
-> La chaîne « CITSA Diffusion » N'EST PAS notre chaîne. Elle republie nos émissions sans autorisation et affiche un numéro qui n'est pas le nôtre.
-> ✅ La seule chaîne officielle est celle-ci : @CITSA_INTERNATIONAL
-> ✅ Le seul numéro officiel est le +237 679562509
+> ⚠️ ATTENTION ⚠️\
+> La chaîne « CITSA Diffusion » N'EST PAS notre chaîne. Elle republie nos émissions sans autorisation et affiche un numéro qui n'est pas le nôtre.\
+> ✅ La seule chaîne officielle est celle-ci : @CITSA_INTERNATIONAL\
+> ✅ Le seul numéro officiel est le +237 679562509\
 > Ne contactez pas d'autre numéro et ne payez aucun « travail spirituel » en dehors de nos canaux officiels.
 
 - [ ] Ajouter aussi en **première ligne de la description de la chaîne CITSA** : « Chaîne officielle de l'ONG CITSA. Seul numéro officiel : +237 679562509. Toute autre chaîne utilisant notre nom n'est pas autorisée. »
