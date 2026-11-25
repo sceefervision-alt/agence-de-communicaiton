@@ -89,3 +89,17 @@ Colonne « Original probable » : rapprochement fait **à partir des titres**, �
 `-y3TvW0jCO0` `tWxzpOjZw4k` `SzkUIKsPvy0` `N3rJlSNyrt8` `mRgT2gd1unU` `N2nhKkx9OEs` `R5Eb2TCNobc` `8TPe_l61dDY` `diASNGYPUhc` `KC-02gxQA9k` `eT5sI2kBdAY` `E94HUWrjmzo` `rIpDa5bWg5g` `_SqQvJ0gfLY` `kL5tic7Ywrs` `JtUfu1y0XMg` `vjctdLK8YjI` `pcsW8pbgoX0` `OmyoZ3FiiUk` `CQ9Tdosaaa0` `0mO-L4yawtk` `-d3KHK-da84` `d2TIZTz56K0` `ohmaiH-8lfo` `mpQrSlql1L4` `eLTzPpaN5HY` `daASSWpNkB0` `gVlFdFxIvIA` `BFn85_iaHaU` `vOqN-QShvwo` `e2Qt-8fVHIc` `sScwPCbhGz8` `d_R9w0X-gbw` `uukNJk1HVw4` `GRNM9fiSKiw` `4bPxqyF5xSM` `2cmtywDHHI4` `gqb8syuOSwA` `leE-IHVY9YI` `qbQrcc3tOWk` `gk0yBMyEKIE` `IOgZIdtKi4E` `y_LXwd18f7Y` `bC5LwqNkeS0` `biwZvguRcCw`
 
 (URL d'un Short : `https://youtube.com/shorts/<ID>`)
+
+---
+
+## Mise à jour du 25/11/2026
+
+**CITSA Diffusion n'est plus visible sur YouTube.** Elle est introuvable par son identifiant `UCLVkBo4tza_vcwfY2je9-Og` (qui ne change jamais, même en cas de changement de nom) et par son adresse @CITSADiffusion. Ses vidéos ne répondent plus non plus (vérifié sur 6 vidéos, dont les 3 plus vues). Elle n'a pas été renommée : une chaîne renommée garde le même identifiant et resterait trouvable. Elle a donc été supprimée, fermée par YouTube ou masquée. La cause ne peut pas être connue de l'extérieur.
+
+**Autres chaînes trouvées qui utilisent le nom CITSA (à faire vérifier par le client) :**
+
+| Chaîne | ID | Création | Abonnés / vues / vidéos | Numéro(s) affiché(s) | Remarque |
+|---|---|---|---|---|---|
+| Citsa Connaissance cachée | `UCgVzKhMQBOjMfVowmy_Z2LA` | 06/12/2025 | 4 720 / 434 195 / 117 | +237 679562509 et **+237 677246193** | Même description copiée et **même numéro que CITSA Diffusion** |
+| Citsa International | `UCzs9DM0nG-zNoblRvtAep9Q` | 17/02/2026 | 5 / 399 / 40 | +237 696696969 et **+237 677246193** | Se présente comme une traduction de « notre chaîne originale » |
+| ONG CITSA INTERNATIONAL | `UCiyDl9lE31ZtHvKCxUQD90A` | 31/10/2026 | 3 / 309 / 8 | +237 687697980 (« WhatsApp unique ») | Autre numéro, se présente comme le maître |
